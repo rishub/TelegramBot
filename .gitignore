@@ -31,3 +31,4 @@ yarn-error.log*
 /venv/
 /server/__pycache__
 /sessions/*.session
+/sessions/*.session-journal
