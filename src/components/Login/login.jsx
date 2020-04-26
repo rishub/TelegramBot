@@ -7,8 +7,10 @@ const STEP_2FA = '2FA';
 
 const PhoneNumber = ({ phoneNumber, setPhoneNumber, handleSubmit }) => {
   const [valid, setValid] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = () => {
+    setLoading(true);
     const valid = /^\d{10}$/.test(phoneNumber);
     if (valid) {
       handleSubmit();
@@ -35,12 +37,21 @@ const PhoneNumber = ({ phoneNumber, setPhoneNumber, handleSubmit }) => {
           Please enter a valid 10 digit US Phone Number
         </p>
       )}
-      <button onClick={onSubmit}>Submit</button>
+      <button onClick={onSubmit}>
+        {loading ? <div className="loader" /> : 'Send'}
+      </button>
     </div>
   );
 };
 
 const TwoFactor = ({ code, setCode, phoneNumber, setStep, handleSubmit }) => {
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = () => {
+    setLoading(true);
+    handleSubmit();
+  };
+
   return (
     <div>
       <h3>Two Factor Auth</h3>
@@ -54,7 +65,9 @@ const TwoFactor = ({ code, setCode, phoneNumber, setStep, handleSubmit }) => {
           if (e.key === 'Enter') handleSubmit();
         }}
       />
-      <button onClick={handleSubmit}>Submit</button>
+      <button onClick={onSubmit}>
+        {loading ? <div className="loader" /> : 'Send'}
+      </button>
       <button onClick={() => setStep(STEP_PHONE)} className="legal buttonLink">
         Change Phone Number
       </button>

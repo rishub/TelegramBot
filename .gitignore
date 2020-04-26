@@ -30,4 +30,4 @@ yarn-error.log*
 # python
 /venv/
 /server/__pycache__
-sessions/*.session
+/sessions/*.session
