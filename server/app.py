@@ -42,13 +42,16 @@ async def send_code_request(phone_number):
 #   if f"{session_path}.session" in os.listdir():
 #       os.remove(f"{session_path}.session")
 
-  client = await get_telegram_client(phone_number)
-  if not await client.is_user_authorized():
-      response = await client.send_code_request("+1" + phone_number)
-      phone_code_hash = response.phone_code_hash
-      return { "loggedIn": False, "hash": phone_code_hash }
-  else:
-      return { "loggedIn": True }
+  try:
+    client = await get_telegram_client(phone_number)
+    if not await client.is_user_authorized():
+        response = await client.send_code_request("+1" + phone_number)
+        phone_code_hash = response.phone_code_hash
+        return { "loggedIn": False, "hash": phone_code_hash }
+    else:
+        return { "loggedIn": True }
+  finally:
+    await client.disconnect()
 
 @app.route("/sendCode", methods=["POST"])
 def send_code():
