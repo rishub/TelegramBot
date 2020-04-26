@@ -62,7 +62,7 @@ def send_code():
 
 
 async def submit_code_request(phone_number, code, hash):
-  try
+  try:
     client = await get_telegram_client(phone_number)
     await client.sign_in("+1" + phone_number, code, phone_code_hash=hash)
     return { "loggedIn": True }
