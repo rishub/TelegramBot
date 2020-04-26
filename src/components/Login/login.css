@@ -1,0 +1,12 @@
+input {
+	font-size: 14px;
+	padding: 10px;
+}
+
+.buttonLink {
+	background: none !important;
+	border: none;
+	padding: 0 !important;
+	cursor: pointer;
+	text-decoration: underline;
+}
