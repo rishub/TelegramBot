@@ -89,7 +89,11 @@ const Main = ({ phoneNumber }) => {
             })}
         </div>
         <div className="selectAllButtons">
-          <button onClick={() => setSelectedChats(_.keys(chats))}>
+          <button
+            onClick={() =>
+              setSelectedChats([...selectedChats, ...filteredChats])
+            }
+          >
             Select all
           </button>
           <button onClick={() => setSelectedChats([])}>Deselect all</button>
