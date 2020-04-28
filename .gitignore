@@ -32,3 +32,4 @@ yarn-error.log*
 /server/__pycache__
 /sessions/*.session
 /sessions/*.session-journal
+/server/*.csv

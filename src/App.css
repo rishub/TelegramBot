@@ -23,6 +23,10 @@ body {
   overflow: scroll;
 }
 
+.chatsList > input {
+  width: 225px;
+}
+
 .chatRow {
   padding: 10px;
   margin: 10px 0;

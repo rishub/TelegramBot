@@ -9,20 +9,22 @@ import './App.css';
 const Main = ({ phoneNumber }) => {
   const [chats, setChats] = useState({});
   const [selectedChats, setSelectedChats] = useState([]);
+  const [filter, setFilter] = useState('');
   const [message, setMessage] = useState('');
   const [loadingChats, setLoadingChats] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
 
-  useEffect(() => {
-    preloadChats();
-  }, []);
-
   const preloadChats = async () => {
     setLoadingChats(true);
     const { data } = await axios.get('/chatData', { params: { phoneNumber } });
-    setChats(data.chatData);
+    const chatData = data.chatData;
+    setChats(chatData);
     setLoadingChats(false);
   };
+
+  useEffect(() => {
+    preloadChats();
+  }, []);
 
   const sendMessage = async () => {
     setSendingMessage(true);
@@ -40,15 +42,33 @@ const Main = ({ phoneNumber }) => {
     }
   };
 
+  const onFilterChange = e => {
+    const filter = e.target.value.toLowerCase();
+    setFilter(filter);
+  };
+
+  const filteredChats = _.keys(
+    _.pickBy(chats, v => v.toLowerCase().includes(filter))
+  );
+
   return (
     <div className="container">
       <div className="chats">
         <h2>Available Chats</h2>
         <div className="chatsList">
+          <input
+            placeholder="Filter..."
+            value={filter}
+            onChange={onFilterChange}
+          />
           {loadingChats && <div className="loader" />}
           {!loadingChats &&
             _.map(chats, (chatName, chatId) => {
               const isChecked = selectedChats.includes(chatId);
+
+              if (!filteredChats.includes(chatId)) {
+                return;
+              }
 
               return (
                 <div
