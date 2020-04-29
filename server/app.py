@@ -3,6 +3,7 @@ from flask import Flask, request, send_from_directory
 import json
 import os
 import requests
+import time
 
 from telethon.sync import TelegramClient
 from telethon import functions
@@ -86,13 +87,17 @@ async def get_chat_data(phone_number):
   try:
     client = await get_telegram_client(phone_number)
     chat_data = {}
-    for dialog in await client.get_dialogs(archived=False):
+    dialogs = await client.get_dialogs(archived=False)
+    dialogs = sorted(dialogs, key=lambda dialog: dialog.date, reverse=True)
+    chat_data = []
+    for dialog in dialogs:
       entity = dialog.entity
       if hasattr(entity, 'broadcast') and entity.broadcast:
         if hasattr(entity, 'creator') and not entity.creator:
           continue
       id = entity.id
-      chat_data[id] = dialog.name
+      name = dialog.name
+      chat_data.append({ "id": id, "name": name })
     return { "chatData": chat_data }
   finally:
     await client.disconnect()
@@ -113,6 +118,7 @@ async def send_message_to_chats(phone_number, message, chat_ids):
     for chat_id in chat_ids:
         chat = await client.get_input_entity(int(chat_id))
         await client.send_message(chat, message)
+        time.sleep(0.5)
     return { "success": True }
   finally:
     await client.disconnect()

@@ -10,21 +10,22 @@ body {
 }
 
 .chats {
-  max-width: 400px;
   margin: 0 auto;
+  width: 40%;
 }
 
 .chatsList {
   border: 1px solid;
   padding: 20px;
   text-align: left;
-  width: 250px;
-  max-height: 400px;
+  max-height: 300px;
   overflow: scroll;
 }
 
 .chatsList > input {
-  width: 225px;
+  width: 100%;
+  margin-bottom: 10px;
+  box-sizing : border-box;
 }
 
 .chatRow {
@@ -41,7 +42,7 @@ body {
 }
 
 .message {
-  width: 100%;
+  width: 60%;
 }
 
 .message textarea {
@@ -86,6 +87,23 @@ button {
   padding-top: 10px;
 }
 
+.confirmation {
+  position: absolute;
+  background: black;
+  color: white;
+  width: 300px;
+  height: 100px;
+  padding: 20px;
+  border-radius: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.confirmation button {
+  cursor: pointer;
+}
+
 
 /* MOBILE STYLES */
 
@@ -98,3 +116,4 @@ button {
     width: 300px;
   }
 }
+
