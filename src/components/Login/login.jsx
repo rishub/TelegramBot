@@ -84,9 +84,10 @@ const LoginFlow = ({ phoneNumber, setPhoneNumber, setAuthenticated }) => {
     const { data } = await axios.post('/sendCode', { phoneNumber });
     if (data.loggedIn) {
       setAuthenticated(true);
+    } else {
+      setPhoneHash(data.hash);
+      setStep(STEP_2FA);
     }
-    setPhoneHash(data.hash);
-    setStep(STEP_2FA);
   };
 
   const handleTwoFactorSubmit = async () => {

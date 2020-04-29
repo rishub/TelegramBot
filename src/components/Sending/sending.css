@@ -1,0 +1,11 @@
+.sendingList {
+	width: 400px;
+	text-align: left;
+	margin: 0 auto;
+}
+
+.retry {
+	cursor: pointer;
+	color: blue;
+	margin-left: 5px;
+}

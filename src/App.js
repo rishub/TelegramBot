@@ -3,6 +3,7 @@ import axios from 'axios';
 import _ from 'lodash';
 
 import Login from './components/Login/login';
+import Sending from './components/Sending/sending';
 
 import './App.css';
 
@@ -26,22 +27,6 @@ const Main = ({ phoneNumber }) => {
   useEffect(() => {
     preloadChats();
   }, []);
-
-  const sendMessage = async () => {
-    setSendingMessage(true);
-    try {
-      const { data } = await axios.post('/sendMessage', {
-        chatIds: _.map(selectedChats, 'id'),
-        message,
-        phoneNumber,
-      });
-      // TODO: toastr success message
-      setSendingMessage(false);
-    } catch {
-      // TODO: handle error
-      setSendingMessage(false);
-    }
-  };
 
   const onFilterChange = e => {
     const filter = e.target.value.toLowerCase();
@@ -72,6 +57,17 @@ const Main = ({ phoneNumber }) => {
       }))
     );
   };
+
+  if (sendingMessage) {
+    const sendingProps = {
+      selectedChats,
+      setSendingMessage,
+      message,
+      phoneNumber,
+    };
+
+    return <Sending {...sendingProps} />;
+  }
 
   return (
     <div className="container">
@@ -153,8 +149,8 @@ const Main = ({ phoneNumber }) => {
             <button
               style={{ background: 'green' }}
               onClick={() => {
-                sendMessage();
                 setShowConfirmation(false);
+                setSendingMessage(true);
               }}
             >
               Yes

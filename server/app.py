@@ -2,6 +2,7 @@ import asyncio
 from flask import Flask, request, send_from_directory
 import json
 import os
+import sys
 import requests
 import time
 
@@ -114,15 +115,23 @@ def chat_data():
 
 # SEND MESSAGE
 
-async def send_message_to_chats(phone_number, message, chat_ids):
+async def send_message_to_chats(phone_number, message, chats):
   try:
     client = await get_telegram_client(phone_number)
 
-    for chat_id in chat_ids:
-        chat = await client.get_input_entity(int(chat_id))
-        await client.send_message(chat, message)
-        time.sleep(0.5)
-    return { "success": True }
+    success_ids = []
+    failure_ids = []
+    for chat in chats:
+        id = chat['id']
+        name = chat['name']
+        try:
+          entity = await client.get_input_entity(int(id))
+          await client.send_message(entity, message)
+          success_ids.append(id)
+        except:
+          print(f"Failed to send message to {name} with error: {sys.exc_info()[0]}")
+          failure_ids.append(id)
+    return { "success_ids": success_ids, "failure_ids": failure_ids }
   finally:
     await client.disconnect()
 
@@ -131,8 +140,8 @@ def send_message():
   data = json.loads(request.data)
   phone_number = data['phoneNumber']
   message = data['message']
-  chat_ids = data['chatIds']
-  response = loop.run_until_complete(send_message_to_chats(phone_number, message, chat_ids))
+  chats = data['chats']
+  response = loop.run_until_complete(send_message_to_chats(phone_number, message, chats))
   return response
 
 if __name__ == '__main__':
