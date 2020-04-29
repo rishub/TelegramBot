@@ -11,7 +11,7 @@ body {
 
 .chats {
   margin: 0 auto;
-  width: 40%;
+  width: 30%;
 }
 
 .chatsList {
@@ -41,12 +41,26 @@ body {
   margin-right: 20px;
 }
 
+.staticRow {
+  cursor: default;
+  justify-content: space-between;
+}
+
+.chatRow > .x {
+  display: none;
+  cursor: pointer;
+}
+
+.chatRow:hover > .x {
+  display: block;
+}
+
 .message {
-  width: 60%;
+  width: 30%;
 }
 
 .message textarea {
-  width: 500px;
+  width: 100%;
   height: 300px;
   padding: 15px;
   font-size: 20px;
@@ -88,16 +102,17 @@ button {
 }
 
 .confirmation {
-  position: absolute;
-  background: black;
-  color: white;
-  width: 300px;
-  height: 100px;
-  padding: 20px;
-  border-radius: 10px;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
+  background: black;
+  color: white;
+  width: 400px;
+  min-height: 100px;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .confirmation button {
@@ -110,6 +125,10 @@ button {
 @media (max-width: 700px) {
   .container {
     flex-direction: column;
+  }
+
+  .chats, .message {
+    width: 100%;
   }
 
   .message textarea {

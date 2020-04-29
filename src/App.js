@@ -13,10 +13,7 @@ const Main = ({ phoneNumber }) => {
   const [loadingChats, setLoadingChats] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const selectedChats = _.map(
-    _.filter(chats, c => c.isChecked),
-    'id'
-  );
+  const selectedChats = _.filter(chats, c => c.isChecked);
 
   const preloadChats = async () => {
     setLoadingChats(true);
@@ -34,7 +31,7 @@ const Main = ({ phoneNumber }) => {
     setSendingMessage(true);
     try {
       const { data } = await axios.post('/sendMessage', {
-        chatIds: selectedChats,
+        chatIds: _.map(selectedChats, 'id'),
         message,
         phoneNumber,
       });
@@ -58,18 +55,20 @@ const Main = ({ phoneNumber }) => {
     );
   };
 
-  const onChatRowClick = index => {
+  const onChatRowClick = id => {
     const newChats = _.cloneDeep(chats);
-    newChats[index].isChecked = !newChats[index].isChecked;
+    const chat = _.find(newChats, c => c.id === id);
+    chat.isChecked = !chat.isChecked;
     setChats(newChats);
   };
 
   const updateAllFiltered = (deselect = false) => {
     const newChats = _.cloneDeep(chats);
+
     setChats(
       _.map(newChats, c => ({
         ...c,
-        isChecked: deselect ? !c.show : c.show,
+        isChecked: c.show ? !deselect : c.isChecked,
       }))
     );
   };
@@ -86,7 +85,7 @@ const Main = ({ phoneNumber }) => {
           />
           {loadingChats && <div className="loader" />}
           {!loadingChats &&
-            _.map(chats, (chat, index) => {
+            _.map(chats, chat => {
               const { id, name, isChecked, show } = chat;
               if (!show) {
                 return;
@@ -96,7 +95,7 @@ const Main = ({ phoneNumber }) => {
                 <div
                   className="chatRow"
                   key={id}
-                  onClick={() => onChatRowClick(index)}
+                  onClick={() => onChatRowClick(id)}
                 >
                   <input
                     type="checkbox"
@@ -114,6 +113,24 @@ const Main = ({ phoneNumber }) => {
         </div>
         <button onClick={preloadChats}>Update list</button>
       </div>
+      <div className="chats">
+        <h2>Selected Chats</h2>
+        <div className="chatsList">
+          <p style={{ margin: 0 }}>{selectedChats.length} items selected</p>
+          {_.map(selectedChats, chat => {
+            const { id, name } = chat;
+
+            return (
+              <div className="chatRow staticRow" key={id}>
+                {name}
+                <span className="x" onClick={() => onChatRowClick(id)}>
+                  &#10005;
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
       <div className="message">
         <h2>Message Body</h2>
         <textarea value={message} onChange={e => setMessage(e.target.value)} />
@@ -123,11 +140,18 @@ const Main = ({ phoneNumber }) => {
       </div>
       {showConfirmation && (
         <div className="confirmation">
-          Are you sure you want to send "{message}" this message to{' '}
-          {selectedChats.length} chat(s)?
+          Are you sure you want to send
+          <br /> "{message}" <br />
+          to {selectedChats.length} chat(s)?
           <div style={{ display: 'flex' }}>
-            <button onClick={() => setShowConfirmation(false)}>No</button>
             <button
+              style={{ background: 'red' }}
+              onClick={() => setShowConfirmation(false)}
+            >
+              No
+            </button>
+            <button
+              style={{ background: 'green' }}
               onClick={() => {
                 sendMessage();
                 setShowConfirmation(false);
