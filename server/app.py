@@ -92,6 +92,9 @@ async def get_chat_data(phone_number):
     chat_data = []
     for dialog in dialogs:
       entity = dialog.entity
+      if hasattr(entity, 'migrated_to'):
+        # chat has been renamed/moved so ignore
+        continue
       if hasattr(entity, 'broadcast') and entity.broadcast:
         if hasattr(entity, 'creator') and not entity.creator:
           continue
