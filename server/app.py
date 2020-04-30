@@ -115,6 +115,8 @@ def chat_data():
 
 # SEND MESSAGE
 
+import random
+
 async def send_message_to_chats(phone_number, message, chats):
   try:
     client = await get_telegram_client(phone_number)
@@ -125,6 +127,8 @@ async def send_message_to_chats(phone_number, message, chats):
         id = chat['id']
         name = chat['name']
         try:
+          if random.randint(0, 7) == 1:
+            raise Exception("test")
           entity = await client.get_input_entity(int(id))
           await client.send_message(entity, message)
           success_ids.append(id)
