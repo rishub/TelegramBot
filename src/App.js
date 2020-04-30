@@ -1,164 +1,79 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import _ from 'lodash';
 
 import Login from './components/Login/login';
+import SelectChats from './components/SelectChats/selectChats';
+import MessageBody from './components/MessageBody/messageBody';
+import ConfirmationModal from './components/ConfirmationModal/confirmationModal';
 import Sending from './components/Sending/sending';
 
 import './App.css';
 
 const Main = ({ phoneNumber }) => {
   const [chats, setChats] = useState([]);
-  const [filter, setFilter] = useState('');
   const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const [loadingChats, setLoadingChats] = useState(false);
-  const [sendingMessage, setSendingMessage] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const selectedChats = _.filter(chats, c => c.isChecked);
 
-  const preloadChats = async () => {
+  const updateChats = useCallback(async () => {
     setLoadingChats(true);
     const { data } = await axios.get('/chatData', { params: { phoneNumber } });
     const chatData = data.chatData;
     setChats(_.map(chatData, o => ({ ...o, isChecked: false, show: true })));
     setLoadingChats(false);
-  };
+  }, [phoneNumber]);
 
   useEffect(() => {
-    preloadChats();
-  }, []);
+    updateChats();
+  }, [updateChats]);
 
-  const onFilterChange = e => {
-    const filter = e.target.value.toLowerCase();
-    setFilter(filter);
-    const newChats = _.cloneDeep(chats);
-    setChats(
-      _.map(newChats, c => ({
-        ...c,
-        show: c.name.toLowerCase().includes(filter),
-      }))
-    );
+  const messageBodyProps = {
+    message,
+    setMessage,
+    onSubmit: () => setShowConfirmation(true),
   };
 
-  const onChatRowClick = id => {
-    const newChats = _.cloneDeep(chats);
-    const chat = _.find(newChats, c => c.id === id);
-    chat.isChecked = !chat.isChecked;
-    setChats(newChats);
+  const selectChatsProps = {
+    chats,
+    setChats,
+    updateChats,
+    selectedChats,
+    loadingChats,
   };
 
-  const updateAllFiltered = (deselect = false) => {
-    const newChats = _.cloneDeep(chats);
-
-    setChats(
-      _.map(newChats, c => ({
-        ...c,
-        isChecked: c.show ? !deselect : c.isChecked,
-      }))
-    );
+  const confirmationModalProps = {
+    message: `Are you sure you want to send "${message}" to ${selectedChats.length} chats?`,
+    onCancel: () => setShowConfirmation(false),
+    onConfirm: () => {
+      setIsSending(true);
+      setShowConfirmation(false);
+    },
   };
 
-  if (sendingMessage) {
-    const sendingProps = {
-      selectedChats,
-      setSendingMessage,
-      message,
-      phoneNumber,
-    };
+  const sendingProps = {
+    selectedChats,
+    setIsSending,
+    phoneNumber,
+    message,
+  };
 
+  if (isSending) {
     return <Sending {...sendingProps} />;
   }
 
   return (
-    <div className="container">
-      <div className="chats">
-        <h2>Available Chats</h2>
-        <div className="chatsList">
-          <input
-            placeholder="Filter..."
-            value={filter}
-            onChange={onFilterChange}
-          />
-          {loadingChats && <div className="loader" />}
-          {!loadingChats &&
-            _.map(chats, chat => {
-              const { id, name, isChecked, show } = chat;
-              if (!show) {
-                return;
-              }
-
-              return (
-                <div
-                  className="chatRow"
-                  key={id}
-                  onClick={() => onChatRowClick(id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => {}}
-                  />
-                  {name}
-                </div>
-              );
-            })}
-        </div>
-        <div className="selectAllButtons">
-          <button onClick={() => updateAllFiltered()}>Select all</button>
-          <button onClick={() => updateAllFiltered(true)}>Deselect all</button>
-        </div>
-        <button onClick={preloadChats}>Update list</button>
-      </div>
-      <div className="chats">
-        <h2>Selected Chats</h2>
-        <div className="chatsList">
-          <p style={{ margin: 0 }}>{selectedChats.length} items selected</p>
-          {_.map(selectedChats, chat => {
-            const { id, name } = chat;
-
-            return (
-              <div className="chatRow staticRow" key={id}>
-                {name}
-                <span className="x" onClick={() => onChatRowClick(id)}>
-                  &#10005;
-                </span>
-              </div>
-            );
-          })}
+    <>
+      <div className={`container ${showConfirmation ? 'blur' : ''}`}>
+        <SelectChats {...selectChatsProps} />
+        <div className="message">
+          <MessageBody {...messageBodyProps} />
         </div>
       </div>
-      <div className="message">
-        <h2>Message Body</h2>
-        <textarea value={message} onChange={e => setMessage(e.target.value)} />
-        <button onClick={() => setShowConfirmation(true)}>
-          {sendingMessage ? <div className="loader" /> : 'Send'}
-        </button>
-      </div>
-      {showConfirmation && (
-        <div className="confirmation">
-          Are you sure you want to send
-          <br /> "{message}" <br />
-          to {selectedChats.length} chat(s)?
-          <div style={{ display: 'flex' }}>
-            <button
-              style={{ background: 'red' }}
-              onClick={() => setShowConfirmation(false)}
-            >
-              No
-            </button>
-            <button
-              style={{ background: 'green' }}
-              onClick={() => {
-                setShowConfirmation(false);
-                setSendingMessage(true);
-              }}
-            >
-              Yes
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      {showConfirmation && <ConfirmationModal {...confirmationModalProps} />}
+    </>
   );
 };
 

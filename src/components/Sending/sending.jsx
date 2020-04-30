@@ -1,29 +1,27 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import _ from 'lodash';
 
 import './sending.css';
 
-const Sending = ({
-  selectedChats,
-  setSendingMessage,
-  message,
-  phoneNumber,
-}) => {
+const Sending = ({ selectedChats, setIsSending, message, phoneNumber }) => {
   const [successes, setSuccesses] = useState([]);
   const [failures, setFailures] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const sendMessageToChats = async chats => {
-    const { data } = await axios.post('/sendMessage', {
-      chats,
-      message,
-      phoneNumber,
-    });
-    return data;
-  };
+  const sendMessageToChats = useCallback(
+    async chats => {
+      const { data } = await axios.post('/sendMessage', {
+        chats,
+        message,
+        phoneNumber,
+      });
+      return data;
+    },
+    [message, phoneNumber]
+  );
 
-  const sendMessages = async () => {
+  const sendMessages = useCallback(async () => {
     setLoading(true);
     const chatChunks = _.chunk(selectedChats, 10);
     let allSuccesses = [];
@@ -40,14 +38,16 @@ const Sending = ({
       }
     }
     setLoading(false);
-  };
+  }, [selectedChats, sendMessageToChats]);
 
   useEffect(() => {
     sendMessages();
-  }, []);
+  }, [sendMessages]);
 
   const retry = async chat => {
     setLoading(true);
+
+    // remove this failure for now to show loading state
     const newFailures = _.cloneDeep(failures);
     _.pull(newFailures, chat.id);
     setFailures(newFailures);
@@ -61,7 +61,7 @@ const Sending = ({
   return (
     <Fragment>
       {!loading && (
-        <button className="backArrow" onClick={() => setSendingMessage(false)}>
+        <button className="backArrow" onClick={() => setIsSending(false)}>
           Back to all chats
         </button>
       )}
