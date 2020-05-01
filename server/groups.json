@@ -1,0 +1,101 @@
+[
+    {
+        "name": "All customers",
+        "id": 1,
+        "chats": [
+            {
+                "id": 1382118977,
+                "name": "Alchemy + Customer15"
+            },
+            {
+                "id": 1338081958,
+                "name": "Customer 10 + Alchemy"
+            },
+            {
+                "id": 1427974352,
+                "name": "Customer13 + Alchemy"
+            },
+            {
+                "id": 1329676797,
+                "name": "Customer 7 + Alchemy"
+            },
+            {
+                "id": 1420755125,
+                "name": "Customer 3 + Alchemy"
+            },
+            {
+                "id": 1259671946,
+                "name": "Alchemy + Customer 9"
+            },
+            {
+                "id": 1272787480,
+                "name": "Customer2 + Alchemy"
+            },
+            {
+                "id": 1374623450,
+                "name": "[VIP] Customer 8 + Alchemy"
+            },
+            {
+                "id": 1434775532,
+                "name": "Customer 20 + Alchemy"
+            },
+            {
+                "id": 1452544863,
+                "name": "Customer 6 + Alchemy"
+            },
+            {
+                "id": 1478180951,
+                "name": "Customer + Alchemy"
+            },
+            {
+                "id": 1490036476,
+                "name": "Customer 16 + Alchemy"
+            },
+            {
+                "id": 1259562041,
+                "name": "Alchemy + Customer"
+            },
+            {
+                "id": 1162770712,
+                "name": "Customer 17 + Alchemy"
+            },
+            {
+                "id": 1196635770,
+                "name": "Alchemy + Customer1"
+            },
+            {
+                "id": 1163724349,
+                "name": "Alchemy + Customer 11"
+            },
+            {
+                "id": 1187519600,
+                "name": "Customer 19 + Alchemy"
+            },
+            {
+                "id": 1345869758,
+                "name": "Alchemy + Customer 14"
+            },
+            {
+                "id": 1386941265,
+                "name": "Alchemy + Customer4"
+            },
+            {
+                "id": 1150314236,
+                "name": "Alchemy + Customer 18"
+            },
+            {
+                "id": 1440279640,
+                "name": "Alchemy + Customer 5"
+            },
+            {
+                "id": 1445174136,
+                "name": "Customer12 + Alchemy"
+            }
+        ]
+    },
+    {
+        "name": "Another group",
+        "id": 2,
+        "chats": []
+    }
+]

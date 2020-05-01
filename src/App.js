@@ -8,6 +8,7 @@ import MessageBody from './components/MessageBody/messageBody';
 import ConfirmationModal from './components/ConfirmationModal/confirmationModal';
 import Sending from './components/Sending/sending';
 import Team from './components/Team/team';
+import Groups from './components/Groups/groups';
 
 import { PAGES } from './constants';
 
@@ -18,7 +19,13 @@ const Main = ({ phoneNumber, page, setPage }) => {
   const [message, setMessage] = useState('');
   const [loadingChats, setLoadingChats] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const selectedChats = _.filter(chats, c => c.isChecked);
+  const [manualOrGroup, setManualOrGroup] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  let selectedChats = _.filter(chats, c => c.isChecked);
+  if (manualOrGroup === 'group' && selectedGroup) {
+    selectedChats = selectedGroup.chats;
+  }
 
   const updateChats = useCallback(async () => {
     setLoadingChats(true);
@@ -29,6 +36,12 @@ const Main = ({ phoneNumber, page, setPage }) => {
   }, [phoneNumber]);
 
   useEffect(() => {
+    const fetchGroups = async () => {
+      const { data } = await axios.get('/groups');
+      setGroups(data.groups || []);
+    };
+
+    fetchGroups();
     updateChats();
   }, [updateChats]);
 
@@ -66,6 +79,14 @@ const Main = ({ phoneNumber, page, setPage }) => {
     phoneNumber,
   };
 
+  const groupsProps = {
+    selectChatsProps,
+    groups,
+    setGroups,
+    selectedGroup,
+    setSelectedGroup,
+  };
+
   if (page === PAGES.SENDING) {
     return <Sending {...sendingProps} />;
   }
@@ -73,8 +94,29 @@ const Main = ({ phoneNumber, page, setPage }) => {
   if (page === PAGES.HOME) {
     return (
       <>
-        <div className={`container ${showConfirmation ? 'blur' : ''}`}>
-          <SelectChats {...selectChatsProps} />
+        <div
+          className={`container ${showConfirmation ? 'blur' : ''}`}
+          style={{ justifyContent: 'space-between' }}
+        >
+          {manualOrGroup ? (
+            <>
+              {manualOrGroup === 'manual' ? (
+                <SelectChats {...selectChatsProps} />
+              ) : (
+                <Groups {...groupsProps} isEditable={false} />
+              )}
+            </>
+          ) : (
+            <div className="manualOrGroup">
+              <button onClick={() => setManualOrGroup('manual')}>
+                Manually select chats
+              </button>
+              OR
+              <button onClick={() => setManualOrGroup('group')}>
+                Select a group
+              </button>
+            </div>
+          )}
           <div className="message">
             <MessageBody {...messageBodyProps} />
           </div>
@@ -89,14 +131,18 @@ const Main = ({ phoneNumber, page, setPage }) => {
   }
 
   if (page === PAGES.GROUPS) {
-    return <div />;
+    return (
+      <div className="container">
+        <Groups {...groupsProps} />
+      </div>
+    );
   }
 };
 
 const App = () => {
-  const [isAuthenticated, setAuthenticated] = useState(false);
+  const [isAuthenticated, setAuthenticated] = useState(true);
   const [page, setPage] = useState(PAGES.HOME);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('4088056887');
 
   if (!isAuthenticated) {
     const loginProps = {

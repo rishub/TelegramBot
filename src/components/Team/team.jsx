@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import axios from 'axios';
 
-const teamMembers = [];
-
 const Team = ({ phoneNumber }) => {
   const [username, setUsername] = useState('');
   const [isValid, setIsValid] = useState(true);
@@ -13,16 +11,13 @@ const Team = ({ phoneNumber }) => {
   useEffect(() => {
     const fetchCurrentMembers = async () => {
       setLoading(true);
-      const { data } = await axios.get('/team', {
-        params: { phoneNumber },
-      });
-
-      setTeam(data.team);
+      const { data } = await axios.get('/team');
+      setTeam(data.team || []);
       setLoading(false);
     };
 
     fetchCurrentMembers();
-  }, [phoneNumber]);
+  }, []);
 
   const addMember = async () => {
     setLoading(true);
@@ -57,7 +52,7 @@ const Team = ({ phoneNumber }) => {
 
   return (
     <>
-      <div className="chats">
+      <div className="chats" style={{ margin: '0 auto' }}>
         <h2>Current Alchemy team</h2>
         <input
           placeholder="Enter username"

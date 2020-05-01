@@ -9,18 +9,13 @@ const SelectChats = ({
   loadingChats,
 }) => {
   const [filter, setFilter] = useState('');
+  const filteredChats = _.filter(chats, c =>
+    c.name.toLowerCase().includes(filter)
+  );
 
   const onFilterChange = e => {
     const filter = e.target.value.toLowerCase();
     setFilter(filter);
-
-    const newChats = _.cloneDeep(chats);
-    setChats(
-      _.map(newChats, c => ({
-        ...c,
-        show: c.name.toLowerCase().includes(filter),
-      }))
-    );
   };
 
   const onChatRowClick = id => {
@@ -36,7 +31,11 @@ const SelectChats = ({
     setChats(
       _.map(newChats, c => ({
         ...c,
-        isChecked: c.show ? !deselect : c.isChecked,
+        isChecked: filteredChats.some(
+          chat => JSON.stringify(chat) === JSON.stringify(c)
+        )
+          ? !deselect
+          : c.isChecked,
       }))
     );
   };
@@ -53,11 +52,8 @@ const SelectChats = ({
           />
           {loadingChats && <div className="loader" />}
           {!loadingChats &&
-            _.map(chats, chat => {
-              const { id, name, isChecked, show } = chat;
-              if (!show) {
-                return;
-              }
+            _.map(filteredChats, chat => {
+              const { id, name, isChecked } = chat;
 
               return (
                 <div

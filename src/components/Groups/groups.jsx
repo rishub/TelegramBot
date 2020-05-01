@@ -1,0 +1,54 @@
+import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
+import axios from 'axios';
+import SelectChats from '../SelectChats/selectChats';
+import GroupWithChats from './groupWithChats';
+
+const Groups = ({ selectChatsProps, groups, setGroups, selectedGroup, setSelectedGroup, isEditable = true }) => {
+  const addSelectedChats = async () => {
+    const { selectedChats, chats, setChats } = selectChatsProps;
+
+    const { data } = await axios.post('/addChatsToGroup', {
+      id: selectedGroup.id,
+      chats: _.map(selectedChats, c => ({ id: c.id, name: c.name })),
+    });
+
+    setSelectedGroup(data.group);
+
+    const newChats = _.cloneDeep(chats);
+    setChats(
+      _.map(newChats, c => ({
+        ...c,
+        isChecked: false,
+      }))
+    );
+  };
+
+  const removeChatFromGroup = async chatId => {
+    const { data } = await axios.post('/removeChatFromGroup', {
+      id: selectedGroup.id,
+      chatId,
+    });
+
+    setSelectedGroup(data.group);
+  };
+
+  const groupWithChatsProps = {
+    groups,
+    setGroups,
+    selectedGroup,
+    setSelectedGroup,
+    isEditable,
+    removeChatFromGroup,
+    addSelectedChats,
+  };
+
+  return (
+    <>
+      <GroupWithChats {...groupWithChatsProps} />
+      {selectedGroup && isEditable && <SelectChats {...selectChatsProps} />}
+    </>
+  );
+};
+
+export default Groups;

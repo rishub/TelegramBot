@@ -17,6 +17,7 @@ SEND_MESSAGE_API = f"https://api.telegram.org/bot{BOT_API_KEY}/sendMessage"
 GET_UPDATES_API = f"https://api.telegram.org/bot{BOT_API_KEY}/getUpdates"
 CHATS_FILENAME = "chats.json"
 TEAM_FILENAME = "team.json"
+GROUPS_FILENAME = "groups.json"
 TELEGRAM_API_ID = "1207385"
 TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 
@@ -155,7 +156,6 @@ if __name__ == '__main__':
 
 @app.route("/team")
 def team():
-  phone_number = request.args.get('phoneNumber')
   # Read current team from json file
   with open(get_file(TEAM_FILENAME)) as json_file:
       team = json.load(json_file)
@@ -179,11 +179,6 @@ async def add_member_to_team(phone_number, username):
         "firstName": entity.first_name,
         "lastName": entity.last_name
       }
-
-      # TODO: figure out photo
-      # from telethon import utils
-      # print(utils.get_input_chat_photo(entity.photo))
-
 
       if user in team:
         team[team.index(user)] = user
@@ -225,6 +220,64 @@ def remove_member():
   return { "team": team }
 
 
+# GROUPS
+
+
+@app.route("/groups")
+def groups():
+  # Read current team from json file
+  with open(get_file(GROUPS_FILENAME)) as json_file:
+      groups = json.load(json_file)
+
+  return { "groups": groups }
+
+
+
+def add_chats_to_group():
+  pass
+
+@app.route("/addChatsToGroup", methods=["POST"])
+def add_chats_to_group():
+  data = json.loads(request.data)
+  group_id = data['id']
+  chats = data['chats']
+
+  with open(get_file(GROUPS_FILENAME)) as json_file:
+      groups = json.load(json_file)
+
+  item = next((x for x in groups if x['id'] == group_id), None)
+  if not item:
+    raise Exception("Invalid group")
+
+  item["chats"].extend(chats)
+  # remove duplicates
+  item["chats"] = list({v['id']:v for v in item["chats"]}.values())
+  with open(get_file(GROUPS_FILENAME),'w') as f:
+      json.dump(groups, f, indent=4)
+
+  return { "group": item }
+
+
+@app.route("/removeChatFromGroup", methods=["POST"])
+def remove_chat_from_group():
+  data = json.loads(request.data)
+  group_id = data['id']
+  chat_id = data['chatId']
+
+  with open(get_file(GROUPS_FILENAME)) as json_file:
+      groups = json.load(json_file)
+
+  item = next((x for x in groups if x['id'] == group_id), None)
+  if not item:
+    raise Exception("Invalid group")
+
+  chat = next((x for x in item["chats"] if x['id'] == chat_id), None)
+  item["chats"].remove(chat)
+
+  with open(get_file(GROUPS_FILENAME),'w') as f:
+      json.dump(groups, f, indent=4)
+
+  return { "group": item }
 # BOT API Code below
 
 # @app.route('/chatData')
