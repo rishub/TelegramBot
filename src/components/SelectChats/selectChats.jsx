@@ -79,7 +79,7 @@ const SelectChats = ({
           <button onClick={() => updateAllFiltered()}>Select all</button>
           <button onClick={() => updateAllFiltered(true)}>Deselect all</button>
         </div>
-        <button onClick={updateChats}>Update list</button>
+        <button onClick={updateChats}>Refresh list</button>
       </div>
       <div className="chats">
         <h2>Selected Chats</h2>

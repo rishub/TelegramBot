@@ -7,13 +7,15 @@ import SelectChats from './components/SelectChats/selectChats';
 import MessageBody from './components/MessageBody/messageBody';
 import ConfirmationModal from './components/ConfirmationModal/confirmationModal';
 import Sending from './components/Sending/sending';
+import Team from './components/Team/team';
+
+import { PAGES } from './constants';
 
 import './App.css';
 
-const Main = ({ phoneNumber }) => {
+const Main = ({ phoneNumber, page, setPage }) => {
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
   const [loadingChats, setLoadingChats] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const selectedChats = _.filter(chats, c => c.isChecked);
@@ -48,52 +50,82 @@ const Main = ({ phoneNumber }) => {
     message: `Are you sure you want to send "${message}" to ${selectedChats.length} chats?`,
     onCancel: () => setShowConfirmation(false),
     onConfirm: () => {
-      setIsSending(true);
+      setPage(PAGES.SENDING);
       setShowConfirmation(false);
     },
   };
 
   const sendingProps = {
     selectedChats,
-    setIsSending,
+    setPage,
     phoneNumber,
     message,
   };
 
-  if (isSending) {
+  const teamProps = {
+    phoneNumber,
+  };
+
+  if (page === PAGES.SENDING) {
     return <Sending {...sendingProps} />;
   }
 
-  return (
-    <>
-      <div className={`container ${showConfirmation ? 'blur' : ''}`}>
-        <SelectChats {...selectChatsProps} />
-        <div className="message">
-          <MessageBody {...messageBodyProps} />
+  if (page === PAGES.HOME) {
+    return (
+      <>
+        <div className={`container ${showConfirmation ? 'blur' : ''}`}>
+          <SelectChats {...selectChatsProps} />
+          <div className="message">
+            <MessageBody {...messageBodyProps} />
+          </div>
         </div>
-      </div>
-      {showConfirmation && <ConfirmationModal {...confirmationModalProps} />}
-    </>
-  );
+        {showConfirmation && <ConfirmationModal {...confirmationModalProps} />}
+      </>
+    );
+  }
+
+  if (page === PAGES.TEAM) {
+    return <Team {...teamProps} />;
+  }
+
+  if (page === PAGES.GROUPS) {
+    return <div />;
+  }
 };
 
 const App = () => {
   const [isAuthenticated, setAuthenticated] = useState(false);
+  const [page, setPage] = useState(PAGES.HOME);
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  if (!isAuthenticated) {
+    const loginProps = {
+      phoneNumber,
+      setPhoneNumber,
+      setAuthenticated,
+    };
+    return <Login {...loginProps} />;
+  }
 
   const mainProps = {
     phoneNumber,
+    page,
+    setPage,
   };
-  if (isAuthenticated) {
-    return <Main {...mainProps} />;
-  }
-
-  const loginProps = {
-    phoneNumber,
-    setPhoneNumber,
-    setAuthenticated,
-  };
-  return <Login {...loginProps} />;
+  return (
+    <>
+      <div className="nav">
+        <button onClick={() => setPage(PAGES.TEAM)}>Manage team</button>
+        <button onClick={() => setPage(PAGES.HOME)}>Home</button>
+        <button onClick={() => setPage(PAGES.GROUPS)}>Manage groups</button>
+        {/* if (match) {
+            return '(' + match[1] + ') ' + match[2] + '-' + match[3]
+          };
+        */}
+      </div>
+      <Main {...mainProps} />
+    </>
+  );
 };
 
 export default App;

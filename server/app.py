@@ -5,6 +5,7 @@ import os
 import sys
 import requests
 import time
+import traceback
 
 from telethon.sync import TelegramClient
 from telethon import functions
@@ -15,11 +16,12 @@ BOT_API_KEY = "1197167345:AAFriOvxhWm7qyPG1h4gMAnN2aIDe_J3OmY"
 SEND_MESSAGE_API = f"https://api.telegram.org/bot{BOT_API_KEY}/sendMessage"
 GET_UPDATES_API = f"https://api.telegram.org/bot{BOT_API_KEY}/getUpdates"
 CHATS_FILENAME = "chats.json"
+TEAM_FILENAME = "team.json"
 TELEGRAM_API_ID = "1207385"
 TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 
-def get_chats_json_path():
-  return os.path.join(app.static_folder, CHATS_FILENAME)
+def get_file(name):
+  return os.path.join(app.static_folder, name)
 
 @app.route('/')
 def index():
@@ -115,8 +117,6 @@ def chat_data():
 
 # SEND MESSAGE
 
-import random
-
 async def send_message_to_chats(phone_number, message, chats):
   try:
     client = await get_telegram_client(phone_number)
@@ -127,13 +127,12 @@ async def send_message_to_chats(phone_number, message, chats):
         id = chat['id']
         name = chat['name']
         try:
-          if random.randint(0, 7) == 1:
-            raise Exception("test")
           entity = await client.get_input_entity(int(id))
           await client.send_message(entity, message)
           success_ids.append(id)
         except:
-          print(f"Failed to send message to {name} with error: {sys.exc_info()[0]}")
+          print(f"Failed to send message to {name}")
+          traceback.print_exc()
           failure_ids.append(id)
     return { "success_ids": success_ids, "failure_ids": failure_ids }
   finally:
@@ -151,6 +150,79 @@ def send_message():
 if __name__ == '__main__':
     app.run()
 
+
+# TEAM
+
+@app.route("/team")
+def team():
+  phone_number = request.args.get('phoneNumber')
+  # Read current team from json file
+  with open(get_file(TEAM_FILENAME)) as json_file:
+      team = json.load(json_file)
+
+  return { "team": team }
+
+
+async def add_member_to_team(phone_number, username):
+  try:
+    client = await get_telegram_client(phone_number)
+    error = False
+
+    # Read current team from json file
+    with open(get_file(TEAM_FILENAME)) as json_file:
+        team = json.load(json_file)
+
+    try:
+      entity = await client.get_entity(username)
+      user = {
+        "username": entity.username,
+        "firstName": entity.first_name,
+        "lastName": entity.last_name
+      }
+
+      # TODO: figure out photo
+      # from telethon import utils
+      # print(utils.get_input_chat_photo(entity.photo))
+
+
+      if user in team:
+        team[team.index(user)] = user
+      else:
+        team.append(user)
+
+      with open(get_file(TEAM_FILENAME),'w') as f:
+        json.dump(team, f, indent=4)
+    except:
+      print(f"Failed to add member:")
+      traceback.print_exc()
+      error = True
+
+    return { "error": error, "team": team }
+  finally:
+    await client.disconnect()
+
+@app.route("/addMember", methods=["POST"])
+def add_member():
+  data = json.loads(request.data)
+  phone_number = data['phoneNumber']
+  username = data['username']
+  response = loop.run_until_complete(add_member_to_team(phone_number, username))
+  return response
+
+
+@app.route("/removeMember", methods=["POST"])
+def remove_member():
+  data = json.loads(request.data)
+  phone_number = data['phoneNumber']
+  username = data['username']
+  # Read current team from json file
+  with open(get_file(TEAM_FILENAME)) as json_file:
+      team = json.load(json_file)
+  item = next((x for x in team if x['username'] == username), None)
+  team.remove(item)
+  with open(get_file(TEAM_FILENAME),'w') as f:
+    json.dump(team, f, indent=4)
+  return { "team": team }
 
 
 # BOT API Code below

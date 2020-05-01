@@ -2,8 +2,23 @@ body {
   text-align: center;
   background-color: #87CEFA;
   font-size: 18px;
-  margin: 5%;
+  margin: 2% 5%;
 }
+
+.nav {
+  display: flex;
+  justify-content: space-around;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.nav button {
+  margin: 0 10px;
+  cursor: pointer;
+}
+
 
 .blur {
   filter: blur(5px);
@@ -39,6 +54,7 @@ body {
   border-radius: 6px;
   display: flex;
   align-items: center;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -52,12 +68,12 @@ body {
 }
 
 .chatRow > .x {
-  display: none;
+  visibility: hidden;
   cursor: pointer;
 }
 
 .chatRow:hover > .x {
-  display: block;
+  visibility: visible;
 }
 
 .message {
