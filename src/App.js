@@ -37,7 +37,7 @@ const Main = ({ phoneNumber, page, setPage }) => {
 
   useEffect(() => {
     const fetchGroups = async () => {
-      const { data } = await axios.get('/groups');
+      const { data } = await axios.get('/groups', { params: { phoneNumber } });
       setGroups(data.groups || []);
     };
 
@@ -140,9 +140,9 @@ const Main = ({ phoneNumber, page, setPage }) => {
 };
 
 const App = () => {
-  const [isAuthenticated, setAuthenticated] = useState(true);
+  const [isAuthenticated, setAuthenticated] = useState(false);
   const [page, setPage] = useState(PAGES.HOME);
-  const [phoneNumber, setPhoneNumber] = useState('4088056887');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   if (!isAuthenticated) {
     const loginProps = {

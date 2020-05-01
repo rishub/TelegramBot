@@ -2,6 +2,7 @@
     {
         "name": "All customers",
         "id": 1,
+        "phoneNumber": "4088056887",
         "chats": [
             {
                 "id": 1382118977,
@@ -96,6 +97,7 @@
     {
         "name": "Another group",
         "id": 2,
+        "phoneNumber": "4088056887",
         "chats": []
     }
 ]

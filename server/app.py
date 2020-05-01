@@ -225,11 +225,15 @@ def remove_member():
 
 @app.route("/groups")
 def groups():
+  phone_number = request.args.get('phoneNumber')
+
   # Read current team from json file
   with open(get_file(GROUPS_FILENAME)) as json_file:
       groups = json.load(json_file)
 
-  return { "groups": groups }
+  my_groups = [group for group in groups if group['phoneNumber'] == phone_number]
+
+  return { "groups": my_groups }
 
 
 
