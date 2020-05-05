@@ -9,6 +9,7 @@ import './sending.css';
 const Sending = ({ selectedChats, setPage, message, phoneNumber }) => {
   const [successes, setSuccesses] = useState([]);
   const [failures, setFailures] = useState([]);
+  const [errorMessages, setErrorMessages] = useState({});
   const [loading, setLoading] = useState(false);
 
   const sendMessageToChats = useCallback(
@@ -28,13 +29,16 @@ const Sending = ({ selectedChats, setPage, message, phoneNumber }) => {
     const chatChunks = _.chunk(selectedChats, 10);
     let allSuccesses = [];
     let allFailures = [];
+    let allErrorMessages = {};
     for (const chats of chatChunks) {
       try {
         const data = await sendMessageToChats(chats);
         allSuccesses = [...allSuccesses, ...data.success_ids];
         allFailures = [...allFailures, ...data.failure_ids];
+        allErrorMessages = { ...allErrorMessages, ...data.error_messages };
         setSuccesses(allSuccesses);
         setFailures(allFailures);
+        setErrorMessages(allErrorMessages);
       } catch {
         setFailures([_.map(selectedChats, 'id')]);
       }
@@ -57,6 +61,8 @@ const Sending = ({ selectedChats, setPage, message, phoneNumber }) => {
     const data = await sendMessageToChats([chat]);
     setSuccesses([...successes, ...data.success_ids]);
     setFailures([...newFailures, ...data.failure_ids]);
+    const currentErrorMessages = _.cloneDeep(errorMessages);
+    setErrorMessages({ ...currentErrorMessages, ...data.error_messages });
     setLoading(false);
   };
 
@@ -83,6 +89,9 @@ const Sending = ({ selectedChats, setPage, message, phoneNumber }) => {
                 {!loading && (
                   <span className="retry" onClick={() => retry(chat)}>
                     Retry
+                    <div className="errorMessage">
+                      Error Message: {errorMessages[id]}
+                    </div>
                   </span>
                 )}
               </div>

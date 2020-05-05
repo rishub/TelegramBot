@@ -33,3 +33,6 @@ yarn-error.log*
 /sessions/*.session
 /sessions/*.session-journal
 /server/*.csv
+
+# DB lol
+/server/groups.json

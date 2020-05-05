@@ -1,10 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import axios from 'axios';
 import SelectChats from '../SelectChats/selectChats';
 import GroupWithChats from './groupWithChats';
 
-const Groups = ({ selectChatsProps, groups, setGroups, selectedGroup, setSelectedGroup, isEditable = true }) => {
+const Groups = ({
+  phoneNumber,
+  selectChatsProps,
+  groups,
+  setGroups,
+  selectedGroup,
+  setSelectedGroup,
+  isEditable = true,
+}) => {
   const addSelectedChats = async () => {
     const { selectedChats, chats, setChats } = selectChatsProps;
 
@@ -34,6 +42,7 @@ const Groups = ({ selectChatsProps, groups, setGroups, selectedGroup, setSelecte
   };
 
   const groupWithChatsProps = {
+    phoneNumber,
     groups,
     setGroups,
     selectedGroup,
@@ -45,7 +54,9 @@ const Groups = ({ selectChatsProps, groups, setGroups, selectedGroup, setSelecte
 
   return (
     <>
-      <GroupWithChats {...groupWithChatsProps} />
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <GroupWithChats {...groupWithChatsProps} />
+      </div>
       {selectedGroup && isEditable && <SelectChats {...selectChatsProps} />}
     </>
   );

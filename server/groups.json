@@ -1,7 +1,6 @@
 [
     {
         "name": "All customers",
-        "id": 1,
         "phoneNumber": "4088056887",
         "chats": [
             {
@@ -81,22 +80,21 @@
                 "name": "Alchemy + Customer4"
             },
             {
-                "id": 1150314236,
-                "name": "Alchemy + Customer 18"
-            },
-            {
                 "id": 1440279640,
                 "name": "Alchemy + Customer 5"
             },
             {
                 "id": 1445174136,
                 "name": "Customer12 + Alchemy"
+            },
+            {
+                "id": 1150314236,
+                "name": "Alchemy + Customer 18"
             }
         ]
     },
     {
         "name": "Another group",
-        "id": 2,
         "phoneNumber": "4088056887",
         "chats": []
     }

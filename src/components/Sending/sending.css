@@ -9,3 +9,15 @@
 	color: blue;
 	margin-left: 5px;
 }
+
+.retry:hover > .errorMessage {
+	display: block;
+}
+
+.errorMessage {
+	display: none;
+	position: absolute;
+	background: white;
+	padding: 10px;
+	border-radius: 5px;
+}

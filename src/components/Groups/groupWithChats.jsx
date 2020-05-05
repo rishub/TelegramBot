@@ -1,31 +1,81 @@
-import _ from 'lodash';
 import React, { useState } from 'react';
+import _ from 'lodash';
+import axios from 'axios';
 
-const groupWithChats = ({
+const GroupWithChats = ({
+  phoneNumber,
   groups,
+  setGroups,
   selectedGroup,
   setSelectedGroup,
   removeChatFromGroup,
   addSelectedChats,
   isEditable,
 }) => {
+  const [groupName, setGroupName] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const addGroup = async () => {
+    if (_.map(groups, 'name').includes(groupName)) {
+      setErrorMessage('Group name already exists!');
+    }
+    const { data } = await axios.post('/addGroup', { groupName, phoneNumber });
+    setGroups(data.groups);
+    setErrorMessage(null);
+  };
+
+  const removeGroup = async (groupName, phoneNumber) => {
+    const { data } = await axios.post('/removeGroup', {
+      groupName,
+      phoneNumber,
+    });
+    const newGroups = data.groups;
+    setGroups(newGroups);
+    setErrorMessage(null);
+  };
+
   return (
     <>
       <div className="chats">
         <h2>Select group</h2>
         <div className="chatsList">
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <input
+              placeholder="Group name"
+              value={groupName}
+              onChange={e => setGroupName(e.target.value)}
+              onKeyPress={e => {
+                if (e.key === 'Enter') addGroup();
+              }}
+            />
+            <button onClick={addGroup}>Add</button>
+          </div>
+          <p className="legal" style={{ color: 'red' }}>
+            {errorMessage}
+          </p>
           {groups.map(group => {
-            const { name, id } = group;
+            const { name, phoneNumber } = group;
             const highlightStyle =
-              group === selectedGroup ? { background: 'yellow ' } : [];
+              name === _.get(selectedGroup, 'name')
+                ? { background: 'yellow ' }
+                : [];
             return (
               <div
-                key={id}
+                key={`${name}${phoneNumber}`}
                 className="chatRow"
-                style={highlightStyle}
+                style={{ ...highlightStyle, justifyContent: 'space-between' }}
                 onClick={() => setSelectedGroup(group)}
               >
                 {name}
+                <span
+                  className="x"
+                  onClick={e => {
+                    e.stopPropagation();
+                    removeGroup(name, phoneNumber);
+                  }}
+                >
+                  &#10005;
+                </span>
               </div>
             );
           })}
@@ -60,4 +110,5 @@ const groupWithChats = ({
     </>
   );
 };
-export default groupWithChats;
+
+export default GroupWithChats;

@@ -1,11 +1,11 @@
 import React from 'react';
 
-import './confirmationModal.css';
+import styles from './confirmationModal.module.css';
 
 const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
-  <div className="confirmation">
+  <div className={styles.confirmation}>
     {message}
-    <div className="buttonsContainer">
+    <div className={styles.buttonsContainer}>
       <button style={{ background: 'red' }} onClick={onCancel}>
         No
       </button>

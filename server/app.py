@@ -96,6 +96,9 @@ async def get_chat_data(phone_number):
     chat_data = []
     for dialog in dialogs:
       entity = dialog.entity
+#       msg_ids = []
+#       async for msg in client.iter_messages(entity, limit=10):
+#         msg_ids.append(msg.from_id)
       if hasattr(entity, 'migrated_to') and entity.migrated_to is not None:
         # chat has been renamed/moved so ignore
         continue
@@ -124,6 +127,7 @@ async def send_message_to_chats(phone_number, message, chats):
 
     success_ids = []
     failure_ids = []
+    error_messages = {}
     for chat in chats:
         id = chat['id']
         name = chat['name']
@@ -135,7 +139,9 @@ async def send_message_to_chats(phone_number, message, chats):
           print(f"Failed to send message to {name}")
           traceback.print_exc()
           failure_ids.append(id)
-    return { "success_ids": success_ids, "failure_ids": failure_ids }
+          error_message = traceback.format_exc().splitlines()[-1]
+          error_messages[id] = error_message
+    return { "success_ids": success_ids, "failure_ids": failure_ids, "error_messages": error_messages }
   finally:
     await client.disconnect()
 
@@ -236,9 +242,31 @@ def groups():
   return { "groups": my_groups }
 
 
+@app.route("/addGroup", methods=["POST"])
+def add_group():
+  data = json.loads(request.data)
+  group_name = data['groupName']
+  phone_number = data['phoneNumber']
+  # Read current team from json file
+  with open(get_file(GROUPS_FILENAME)) as json_file:
+      groups = json.load(json_file)
+  groups.append({ "name": group_name, "phoneNumber": phone_number, "chats": [] })
+  with open(get_file(GROUPS_FILENAME),'w') as f:
+        json.dump(groups, f, indent=4)
+  return { "groups": groups }
 
-def add_chats_to_group():
-  pass
+@app.route("/removeGroup", methods=["POST"])
+def remove_group():
+  data = json.loads(request.data)
+  group_name = data['groupName']
+  phone_number = data['phoneNumber']
+  # Read current team from json file
+  with open(get_file(GROUPS_FILENAME)) as json_file:
+      groups = json.load(json_file)
+  groups = [group for group in groups if not (group['name'] == group_name and group["phoneNumber"] == phone_number)]
+  with open(get_file(GROUPS_FILENAME),'w') as f:
+        json.dump(groups, f, indent=4)
+  return { "groups": groups }
 
 @app.route("/addChatsToGroup", methods=["POST"])
 def add_chats_to_group():
