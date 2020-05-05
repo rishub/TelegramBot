@@ -54,10 +54,14 @@ const Groups = ({
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-        <GroupWithChats {...groupWithChatsProps} />
-      </div>
-      {selectedGroup && isEditable && <SelectChats {...selectChatsProps} />}
+      <GroupWithChats {...groupWithChatsProps} />
+      {selectedGroup && isEditable && (
+        <div
+          style={{ display: 'flex', justifyContent: 'center', width: '100%' }}
+        >
+          <SelectChats {...selectChatsProps} />}
+        </div>
+      )}
     </>
   );
 };
