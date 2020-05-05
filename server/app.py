@@ -2,6 +2,7 @@ import asyncio
 from flask import Flask, request, send_from_directory
 import json
 import os
+import datetime
 import sys
 import requests
 import time
@@ -310,6 +311,53 @@ def remove_chat_from_group():
       json.dump(groups, f, indent=4)
 
   return { "group": item }
+
+
+
+async def get_num_chats(phone_number):
+  try:
+    client = await get_telegram_client(phone_number)
+    chat_data = {}
+    dialogs = await client.get_dialogs(archived=False)
+    dialogs = sorted(dialogs, key=lambda dialog: dialog.date, reverse=True)
+    chat_data = []
+    for dialog in dialogs:
+      num_chats = 0
+      name = dialog.name
+      if not any([item in name for item in ["Alchemy +", "+ Alchemy", "<> Alchemy", "Alchemy <>"]]):
+        continue
+      entity = dialog.entity
+      id = entity.id
+
+      if hasattr(entity, 'migrated_to') and entity.migrated_to is not None:
+        # chat has been renamed/moved so ignore
+        continue
+      if hasattr(entity, 'broadcast') and entity.broadcast:
+        if hasattr(entity, 'creator') and not entity.creator:
+          continue
+
+      two_months_ago = (datetime.date.today() - datetime.timedelta(2*365/12))
+      start_id = -1
+      async for msg in client.iter_messages(entity, limit=1, offset_date=two_months_ago):
+        print(msg)
+        start_id = msg.id
+      async for msg in client.iter_messages(entity, min_id=start_id):
+        num_chats += 1
+      chat_data.append({ "id": id, "name": name, "numChats": num_chats })
+
+    chat_data = sorted(chat_data, key=lambda chat: chat['numChats'], reverse=True)
+    return { "chatData": chat_data }
+  finally:
+    await client.disconnect()
+
+@app.route("/numChats")
+def num_chats():
+  phone_number = request.args.get('phoneNumber')
+  response = loop.run_until_complete(get_num_chats(phone_number))
+  return response
+
+
+
 # BOT API Code below
 
 # @app.route('/chatData')
