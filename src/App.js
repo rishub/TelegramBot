@@ -9,7 +9,6 @@ import ConfirmationModal from './components/ConfirmationModal/confirmationModal'
 import Sending from './components/Sending/sending';
 import Team from './components/Team/team';
 import Groups from './components/Groups/groups';
-import NumChats from './components/NumChats/numChats';
 
 import { PAGES } from './constants';
 
@@ -89,17 +88,26 @@ const Main = ({ phoneNumber, page, setPage }) => {
     setSelectedGroup,
   };
 
-  const numChatsProps = {
-    phoneNumber,
-  };
-
   if (page === PAGES.SENDING) {
     return <Sending {...sendingProps} />;
   }
 
   if (page === PAGES.HOME) {
+    const ButtonManual = () => (
+      <button onClick={() => setManualOrGroup('manual')}>
+        Select chats manually
+      </button>
+    );
+    const ButtonGroup = () => (
+      <button onClick={() => setManualOrGroup('group')}>Select a group</button>
+    );
     return (
       <>
+        {manualOrGroup && (
+          <div style={{ width: '200px' }}>
+            {manualOrGroup === 'manual' ? <ButtonGroup /> : <ButtonManual />}
+          </div>
+        )}
         <div
           className={`container ${showConfirmation ? 'blur' : ''}`}
           style={{ justifyContent: 'space-between' }}
@@ -114,13 +122,9 @@ const Main = ({ phoneNumber, page, setPage }) => {
             </>
           ) : (
             <div className="manualOrGroup">
-              <button onClick={() => setManualOrGroup('manual')}>
-                Manually select chats
-              </button>
+              <ButtonManual />
               OR
-              <button onClick={() => setManualOrGroup('group')}>
-                Select a group
-              </button>
+              <ButtonGroup />
             </div>
           )}
           <div className="message">
@@ -140,14 +144,6 @@ const Main = ({ phoneNumber, page, setPage }) => {
     return (
       <div className="container">
         <Groups {...groupsProps} />
-      </div>
-    );
-  }
-
-  if (page === PAGES.NUM_CHATS) {
-    return (
-      <div className="container">
-        <NumChats {...numChatsProps} />
       </div>
     );
   }
@@ -178,7 +174,6 @@ const App = () => {
         <button onClick={() => setPage(PAGES.TEAM)}>Manage team</button>
         <button onClick={() => setPage(PAGES.HOME)}>Home</button>
         <button onClick={() => setPage(PAGES.GROUPS)}>Manage groups</button>
-        <button onClick={() => setPage(PAGES.NUM_CHATS)}># of Chats</button>
         {/* if (match) {
             return '(' + match[1] + ') ' + match[2] + '-' + match[3]
           };

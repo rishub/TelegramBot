@@ -133,8 +133,26 @@ async def send_message_to_chats(phone_number, message, chats):
         id = chat['id']
         name = chat['name']
         try:
+          with open(get_file(TEAM_FILENAME)) as json_file:
+            team = json.load(json_file)
+          team_ids = [member['id'] for member in team]
           entity = await client.get_input_entity(int(id))
-          await client.send_message(entity, message)
+          username = ""
+          user_id = ""
+          async for msg in client.iter_messages(entity, limit=10):
+            from_id = msg.from_id
+            if from_id and from_id not in team_ids:
+              # member is not in team so at them
+              user = await client.get_entity(from_id)
+              username = user.username
+              if not username:
+                username = user.first_name
+              user_id = from_id
+              break
+          if username:
+            await client.send_message(entity, "["+username+"](tg://user?id="+str(user_id)+") " + message)
+          else:
+            await client.send_message(entity, message)
           success_ids.append(id)
         except:
           print(f"Failed to send message to {name}")
@@ -182,6 +200,7 @@ async def add_member_to_team(phone_number, username):
     try:
       entity = await client.get_entity(username)
       user = {
+        "id": entity.id,
         "username": entity.username,
         "firstName": entity.first_name,
         "lastName": entity.last_name
@@ -272,13 +291,14 @@ def remove_group():
 @app.route("/addChatsToGroup", methods=["POST"])
 def add_chats_to_group():
   data = json.loads(request.data)
-  group_id = data['id']
+  group_name = data['name']
+  phone_number = data['phoneNumber']
   chats = data['chats']
 
   with open(get_file(GROUPS_FILENAME)) as json_file:
       groups = json.load(json_file)
 
-  item = next((x for x in groups if x['id'] == group_id), None)
+  item = next((x for x in groups if x['name'] == group_name and x['phoneNumber'] == phone_number), None)
   if not item:
     raise Exception("Invalid group")
 
@@ -294,13 +314,14 @@ def add_chats_to_group():
 @app.route("/removeChatFromGroup", methods=["POST"])
 def remove_chat_from_group():
   data = json.loads(request.data)
-  group_id = data['id']
+  group_name = data['name']
+  phone_number = data['phoneNumber']
   chat_id = data['chatId']
 
   with open(get_file(GROUPS_FILENAME)) as json_file:
       groups = json.load(json_file)
 
-  item = next((x for x in groups if x['id'] == group_id), None)
+  item = next((x for x in groups if x['name'] == group_name and x['phoneNumber'] == phone_number), None)
   if not item:
     raise Exception("Invalid group")
 
@@ -314,47 +335,49 @@ def remove_chat_from_group():
 
 
 
-async def get_num_chats(phone_number):
-  try:
-    client = await get_telegram_client(phone_number)
-    chat_data = {}
-    dialogs = await client.get_dialogs(archived=False)
-    dialogs = sorted(dialogs, key=lambda dialog: dialog.date, reverse=True)
-    chat_data = []
-    for dialog in dialogs:
-      num_chats = 0
-      name = dialog.name
-      if not any([item in name for item in ["Alchemy +", "+ Alchemy", "<> Alchemy", "Alchemy <>"]]):
-        continue
-      entity = dialog.entity
-      id = entity.id
-
-      if hasattr(entity, 'migrated_to') and entity.migrated_to is not None:
-        # chat has been renamed/moved so ignore
-        continue
-      if hasattr(entity, 'broadcast') and entity.broadcast:
-        if hasattr(entity, 'creator') and not entity.creator:
-          continue
-
-      two_months_ago = (datetime.date.today() - datetime.timedelta(2*365/12))
-      start_id = -1
-      async for msg in client.iter_messages(entity, limit=1, offset_date=two_months_ago):
-        print(msg)
-        start_id = msg.id
-      async for msg in client.iter_messages(entity, min_id=start_id):
-        num_chats += 1
-      chat_data.append({ "id": id, "name": name, "numChats": num_chats })
-
-    chat_data = sorted(chat_data, key=lambda chat: chat['numChats'], reverse=True)
-    return { "chatData": chat_data }
-  finally:
-    await client.disconnect()
-
-@app.route("/numChats")
-def num_chats():
-  phone_number = request.args.get('phoneNumber')
-  response = loop.run_until_complete(get_num_chats(phone_number))
-  return response
+# async def get_num_chats(phone_number):
+#   try:
+#     client = await get_telegram_client(phone_number)
+#     chat_data = {}
+#     dialogs = await client.get_dialogs(archived=False)
+#     dialogs = sorted(dialogs, key=lambda dialog: dialog.date, reverse=True)
+#     chat_data = []
+#     for dialog in dialogs:
+#       if len(chat_data) == 10:
+#         break
+#       num_chats = 0
+#       name = dialog.name
+#       if not any([item in name for item in ["Alchemy +", "+ Alchemy", "<> Alchemy", "Alchemy <>"]]):
+#         continue
+#       entity = dialog.entity
+#       id = entity.id
+#
+#       if hasattr(entity, 'migrated_to') and entity.migrated_to is not None:
+#         # chat has been renamed/moved so ignore
+#         continue
+#       if hasattr(entity, 'broadcast') and entity.broadcast:
+#         if hasattr(entity, 'creator') and not entity.creator:
+#           continue
+#
+#       two_months_ago = (datetime.date.today() - datetime.timedelta(2*365/12))
+#       start_id = -1
+#       async for msg in client.iter_messages(entity, limit=1, offset_date=two_months_ago):
+#         print(msg)
+#         start_id = msg.id
+#       async for msg in client.iter_messages(entity, min_id=start_id):
+#         num_chats += 1
+#       chat_data.append({ "id": id, "name": name, "numChats": num_chats })
+#
+#     chat_data = sorted(chat_data, key=lambda chat: chat['numChats'], reverse=True)
+#     return { "chatData": chat_data }
+#   finally:
+#     await client.disconnect()
+#
+# @app.route("/numChats")
+# def num_chats():
+#   phone_number = request.args.get('phoneNumber')
+#   response = loop.run_until_complete(get_num_chats(phone_number))
+#   return response
 
 
 

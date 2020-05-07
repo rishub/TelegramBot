@@ -3,5 +3,4 @@ export const PAGES = {
   SENDING: 'Sending',
   TEAM: 'Team',
   GROUPS: 'Groups',
-  NUM_CHATS: 'NumChats',
 };

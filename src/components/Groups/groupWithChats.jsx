@@ -67,15 +67,17 @@ const GroupWithChats = ({
                 onClick={() => setSelectedGroup(group)}
               >
                 {name}
-                <span
-                  className="x"
-                  onClick={e => {
-                    e.stopPropagation();
-                    removeGroup(name, phoneNumber);
-                  }}
-                >
-                  &#10005;
-                </span>
+                {isEditable && (
+                  <span
+                    className="x"
+                    onClick={e => {
+                      e.stopPropagation();
+                      removeGroup(name, phoneNumber);
+                    }}
+                  >
+                    &#10005;
+                  </span>
+                )}
               </div>
             );
           })}
@@ -91,9 +93,14 @@ const GroupWithChats = ({
                 return (
                   <div key={id} className="chatRow staticRow">
                     {name}
-                    <span className="x" onClick={() => removeChatFromGroup(id)}>
-                      &#10005;
-                    </span>
+                    {isEditable && (
+                      <span
+                        className="x"
+                        onClick={() => removeChatFromGroup(id)}
+                      >
+                        &#10005;
+                      </span>
+                    )}
                   </div>
                 );
               })}

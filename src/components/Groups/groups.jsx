@@ -14,10 +14,13 @@ const Groups = ({
   isEditable = true,
 }) => {
   const addSelectedChats = async () => {
+    console.log('test');
+    console.log(selectedGroup);
     const { selectedChats, chats, setChats } = selectChatsProps;
 
     const { data } = await axios.post('/addChatsToGroup', {
-      id: selectedGroup.id,
+      phoneNumber,
+      name: selectedGroup.name,
       chats: _.map(selectedChats, c => ({ id: c.id, name: c.name })),
     });
 
@@ -34,7 +37,8 @@ const Groups = ({
 
   const removeChatFromGroup = async chatId => {
     const { data } = await axios.post('/removeChatFromGroup', {
-      id: selectedGroup.id,
+      phoneNumber,
+      name: selectedGroup.name,
       chatId,
     });
 
@@ -59,7 +63,7 @@ const Groups = ({
         <div
           style={{ display: 'flex', justifyContent: 'center', width: '100%' }}
         >
-          <SelectChats {...selectChatsProps} />}
+          <SelectChats {...selectChatsProps} />
         </div>
       )}
     </>

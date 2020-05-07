@@ -4,98 +4,61 @@
         "phoneNumber": "4088056887",
         "chats": [
             {
-                "id": 1382118977,
-                "name": "Alchemy + Customer15"
+                "id": 333217420,
+                "name": "Customer 13 + Alchemy"
             },
             {
-                "id": 1338081958,
-                "name": "Customer 10 + Alchemy"
-            },
-            {
-                "id": 1427974352,
-                "name": "Customer13 + Alchemy"
-            },
-            {
-                "id": 1329676797,
-                "name": "Customer 7 + Alchemy"
-            },
-            {
-                "id": 1420755125,
-                "name": "Customer 3 + Alchemy"
-            },
-            {
-                "id": 1259671946,
-                "name": "Alchemy + Customer 9"
-            },
-            {
-                "id": 1272787480,
-                "name": "Customer2 + Alchemy"
-            },
-            {
-                "id": 1374623450,
-                "name": "[VIP] Customer 8 + Alchemy"
-            },
-            {
-                "id": 1434775532,
-                "name": "Customer 20 + Alchemy"
-            },
-            {
-                "id": 1452544863,
-                "name": "Customer 6 + Alchemy"
-            },
-            {
-                "id": 1478180951,
-                "name": "Customer + Alchemy"
-            },
-            {
-                "id": 1490036476,
-                "name": "Customer 16 + Alchemy"
-            },
-            {
-                "id": 1259562041,
-                "name": "Alchemy + Customer"
-            },
-            {
-                "id": 1162770712,
-                "name": "Customer 17 + Alchemy"
-            },
-            {
-                "id": 1196635770,
-                "name": "Alchemy + Customer1"
-            },
-            {
-                "id": 1163724349,
-                "name": "Alchemy + Customer 11"
-            },
-            {
-                "id": 1187519600,
-                "name": "Customer 19 + Alchemy"
-            },
-            {
-                "id": 1345869758,
+                "id": 383403991,
                 "name": "Alchemy + Customer 14"
             },
             {
-                "id": 1386941265,
-                "name": "Alchemy + Customer4"
+                "id": 294688153,
+                "name": "Alchemy + Customer11"
             },
             {
-                "id": 1440279640,
-                "name": "Alchemy + Customer 5"
+                "id": 329333776,
+                "name": "Alchemy + Customer 10"
             },
             {
-                "id": 1445174136,
-                "name": "Customer12 + Alchemy"
+                "id": 369764573,
+                "name": "Alchemy + Customer 12"
             },
             {
-                "id": 1150314236,
-                "name": "Alchemy + Customer 18"
+                "id": 406132025,
+                "name": "Customer 9 + Alchemy"
+            },
+            {
+                "id": 421586303,
+                "name": "Alchemy + Customer 7"
+            },
+            {
+                "id": 481848424,
+                "name": "Customer8 + Alchemy"
+            },
+            {
+                "id": 416620720,
+                "name": "Customer 5 + Alchemy"
+            },
+            {
+                "id": 449401827,
+                "name": "Customer4 + Alchemy"
+            },
+            {
+                "id": 490261937,
+                "name": "Alchemy + Customer6"
+            },
+            {
+                "id": 295927558,
+                "name": "Alchemy + Customer2"
+            },
+            {
+                "id": 455837070,
+                "name": "Alchemy + Customer 1"
+            },
+            {
+                "id": 498912650,
+                "name": "Customer 3 + Alchemy"
             }
         ]
-    },
-    {
-        "name": "Another group",
-        "phoneNumber": "4088056887",
-        "chats": []
     }
 ]
