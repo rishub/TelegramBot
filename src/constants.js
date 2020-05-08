@@ -3,4 +3,5 @@ export const PAGES = {
   SENDING: 'Sending',
   TEAM: 'Team',
   GROUPS: 'Groups',
+  CREATE_CHANNEL: 'Create Channel',
 };

@@ -9,7 +9,7 @@ import time
 import traceback
 
 from telethon.sync import TelegramClient
-from telethon import functions
+from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest
 
 app = Flask(__name__, static_folder='')
 
@@ -358,6 +358,54 @@ def remove_chat_from_group():
 
   return { "group": item }
 
+
+# CREATE A CHANNEL FLOW
+
+async def create_channel_request(phone_number, channel_name):
+  success = True
+  try:
+    client = await get_telegram_client(phone_number)
+    await client(CreateChannelRequest(channel_name, "", megagroup=True))
+  except:
+    print(f"Failed to create channel:")
+    traceback.print_exc()
+    success = False
+  finally:
+    await client.disconnect()
+  return { "success": success }
+
+@app.route("/createChannel", methods=["POST"])
+def create_channel():
+  data = json.loads(request.data)
+  channel_name = data['channelName']
+  phone_number = data['phoneNumber']
+  response = loop.run_until_complete(create_channel_request(phone_number, channel_name))
+  return response
+
+
+async def add_members(phone_number, channel_name):
+  success = True
+  try:
+    client = await get_telegram_client(phone_number)
+    with open(get_file(TEAM_FILENAME)) as json_file:
+      team = json.load(json_file)
+    usernames = [member['username'] for member in team]
+    await client(InviteToChannelRequest(channel_name, usernames))
+  except:
+    print(f"Failed to add members to channel:")
+    traceback.print_exc()
+    success = False
+  finally:
+    await client.disconnect()
+  return { "success": success }
+
+@app.route("/addMembersToChannel", methods=["POST"])
+def add_members_to_channel():
+  data = json.loads(request.data)
+  channel_name = data['channelName']
+  phone_number = data['phoneNumber']
+  response = loop.run_until_complete(add_members(phone_number, channel_name))
+  return response
 
 
 # async def get_num_chats(phone_number):

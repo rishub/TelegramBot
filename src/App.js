@@ -9,6 +9,7 @@ import ConfirmationModal from './components/ConfirmationModal/confirmationModal'
 import Sending from './components/Sending/sending';
 import Team from './components/Team/team';
 import Groups from './components/Groups/groups';
+import CreateChannel from './components/CreateChannel/createChannel';
 
 import { PAGES } from './constants';
 
@@ -88,6 +89,10 @@ const Main = ({ phoneNumber, page, setPage }) => {
     setSelectedGroup,
   };
 
+  const createChannelProps = {
+    phoneNumber,
+  };
+
   if (page === PAGES.SENDING) {
     return <Sending {...sendingProps} />;
   }
@@ -144,6 +149,14 @@ const Main = ({ phoneNumber, page, setPage }) => {
     return (
       <div className="container">
         <Groups {...groupsProps} />
+      </div>
+    );
+  }
+
+  if (page === PAGES.CREATE_CHANNEL) {
+    return (
+      <div className="container">
+        <CreateChannel {...createChannelProps} />
       </div>
     );
   }
@@ -225,6 +238,14 @@ const App = () => {
             onClick={() => setPage(PAGES.GROUPS)}
           >
             Manage groups
+          </span>
+          <span
+            className={`navLink ${[
+              page === PAGES.CREATE_CHANNEL ? 'active' : '',
+            ]}`}
+            onClick={() => setPage(PAGES.CREATE_CHANNEL)}
+          >
+            Create a channel
           </span>
         </div>
         <div>
