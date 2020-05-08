@@ -83,6 +83,7 @@ const LoginFlow = ({ phoneNumber, setPhoneNumber, setAuthenticated }) => {
   const handlePhoneSubmit = async () => {
     const { data } = await axios.post('/sendCode', { phoneNumber });
     if (data.loggedIn) {
+      localStorage.setItem('auth', data.auth);
       setAuthenticated(true);
     } else {
       setPhoneHash(data.hash);
@@ -97,6 +98,7 @@ const LoginFlow = ({ phoneNumber, setPhoneNumber, setAuthenticated }) => {
       phoneNumber,
     });
     if (data.loggedIn) {
+      localStorage.setItem('auth', data.auth);
       setAuthenticated(true);
     } else {
       // TODO: handle error

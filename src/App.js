@@ -150,9 +150,40 @@ const Main = ({ phoneNumber, page, setPage }) => {
 };
 
 const App = () => {
-  const [isAuthenticated, setAuthenticated] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [isAuthenticated, setAuthenticated] = useState(false);
   const [page, setPage] = useState(PAGES.HOME);
-  const [phoneNumber, setPhoneNumber] = useState('4088056887');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const auth = localStorage.getItem('auth');
+      try {
+        const { data } = await axios.get('/checkAuth', {
+          params: { auth },
+        });
+        if (data.loggedIn) {
+          setAuthenticated(true);
+          setPhoneNumber(data.phoneNumber);
+        }
+        setReady(true);
+      } catch (e) {
+        setReady(true);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const logOut = () => {
+    setAuthenticated(false);
+    setPhoneNumber('');
+    localStorage.setItem('auth', '');
+  };
+
+  if (!ready) {
+    return <div />;
+  }
 
   if (!isAuthenticated) {
     const loginProps = {
@@ -177,24 +208,24 @@ const App = () => {
             src="https://www.shareicon.net/data/128x128/2016/11/03/849462_messenger_512x512.png"
             alt="Telegram automation"
           />
-          <a
+          <span
             className={`navLink ${[page === PAGES.HOME ? 'active' : '']}`}
             onClick={() => setPage(PAGES.HOME)}
           >
             Home
-          </a>
-          <a
+          </span>
+          <span
             className={`navLink ${[page === PAGES.TEAM ? 'active' : '']}`}
             onClick={() => setPage(PAGES.TEAM)}
           >
             Manage team
-          </a>
-          <a
+          </span>
+          <span
             className={`navLink ${[page === PAGES.GROUPS ? 'active' : '']}`}
             onClick={() => setPage(PAGES.GROUPS)}
           >
             Manage groups
-          </a>
+          </span>
         </div>
         <div>
           {'(' +
@@ -203,6 +234,9 @@ const App = () => {
             phoneNumber.slice(3, 6) +
             '-' +
             phoneNumber.slice(6, 10)}
+          <span className="navLink" style={{ color: 'blue' }} onClick={logOut}>
+            Log out
+          </span>
         </div>
       </div>
       <div className="main">

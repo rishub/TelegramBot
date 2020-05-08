@@ -42,6 +42,29 @@ async def get_telegram_client(phone_number):
 
 # LOG IN FLOW
 
+async def open_session(auth):
+  phone_number = ""
+  logged_in = False
+  for filename in os.listdir("sessions"):
+    if filename.endswith(".session"):
+      client = TelegramClient("sessions/" + filename, TELEGRAM_API_ID, TELEGRAM_API_HASH)
+      auth_key = client.session.auth_key.key.hex()
+      await client.disconnect()
+      authed = auth_key == auth
+      if authed:
+        phone_number = filename.split(".session")[0]
+        logged_in = True
+    else:
+        continue
+  return { "loggedIn": logged_in, "phoneNumber": phone_number }
+
+@app.route("/checkAuth")
+def check_auth():
+  auth = request.args.get('auth')
+  response = loop.run_until_complete(open_session(auth))
+  return response
+
+
 async def send_code_request(phone_number):
 #   session_path = f"sessions/{phone_number}"
 #   os.chdir(sys.path[0])
@@ -55,7 +78,8 @@ async def send_code_request(phone_number):
         phone_code_hash = response.phone_code_hash
         return { "loggedIn": False, "hash": phone_code_hash }
     else:
-        return { "loggedIn": True }
+        auth_key = client.session.auth_key.key.hex()
+        return { "loggedIn": True, "auth": auth_key }
   finally:
     await client.disconnect()
 
@@ -71,7 +95,8 @@ async def submit_code_request(phone_number, code, hash):
   try:
     client = await get_telegram_client(phone_number)
     await client.sign_in("+1" + phone_number, code, phone_code_hash=hash)
-    return { "loggedIn": True }
+    auth_key = client.session.auth_key.key.hex()
+    return { "loggedIn": True, "auth": auth_key }
   finally:
     await client.disconnect()
 
