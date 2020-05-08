@@ -43,7 +43,7 @@ const Main = ({ phoneNumber, page, setPage }) => {
 
     fetchGroups();
     updateChats();
-  }, [updateChats]);
+  }, [updateChats, phoneNumber]);
 
   const messageBodyProps = {
     message,
@@ -150,9 +150,9 @@ const Main = ({ phoneNumber, page, setPage }) => {
 };
 
 const App = () => {
-  const [isAuthenticated, setAuthenticated] = useState(false);
+  const [isAuthenticated, setAuthenticated] = useState(true);
   const [page, setPage] = useState(PAGES.HOME);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('4088056887');
 
   if (!isAuthenticated) {
     const loginProps = {
@@ -171,15 +171,43 @@ const App = () => {
   return (
     <>
       <div className="nav">
-        <button onClick={() => setPage(PAGES.TEAM)}>Manage team</button>
-        <button onClick={() => setPage(PAGES.HOME)}>Home</button>
-        <button onClick={() => setPage(PAGES.GROUPS)}>Manage groups</button>
-        {/* if (match) {
-            return '(' + match[1] + ') ' + match[2] + '-' + match[3]
-          };
-        */}
+        <div className="navLinks">
+          <img
+            className="telegramIcon"
+            src="https://www.shareicon.net/data/128x128/2016/11/03/849462_messenger_512x512.png"
+            alt="Telegram automation"
+          />
+          <a
+            className={`navLink ${[page === PAGES.HOME ? 'active' : '']}`}
+            onClick={() => setPage(PAGES.HOME)}
+          >
+            Home
+          </a>
+          <a
+            className={`navLink ${[page === PAGES.TEAM ? 'active' : '']}`}
+            onClick={() => setPage(PAGES.TEAM)}
+          >
+            Manage team
+          </a>
+          <a
+            className={`navLink ${[page === PAGES.GROUPS ? 'active' : '']}`}
+            onClick={() => setPage(PAGES.GROUPS)}
+          >
+            Manage groups
+          </a>
+        </div>
+        <div>
+          {'(' +
+            phoneNumber.slice(0, 3) +
+            ') ' +
+            phoneNumber.slice(3, 6) +
+            '-' +
+            phoneNumber.slice(6, 10)}
+        </div>
       </div>
-      <Main {...mainProps} />
+      <div className="main">
+        <Main {...mainProps} />
+      </div>
     </>
   );
 };
