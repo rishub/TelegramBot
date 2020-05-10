@@ -42,6 +42,10 @@ const Main = ({ phoneNumber, page, setPage }) => {
       setGroups(data.groups || []);
     };
 
+    if (phoneNumber === '') {
+      return;
+    }
+
     fetchGroups();
     updateChats();
   }, [updateChats, phoneNumber]);
@@ -163,7 +167,6 @@ const Main = ({ phoneNumber, page, setPage }) => {
 };
 
 const App = () => {
-  const [ready, setReady] = useState(false);
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [page, setPage] = useState(PAGES.HOME);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -176,15 +179,17 @@ const App = () => {
           params: { auth },
         });
         if (data.loggedIn) {
-          setAuthenticated(true);
           setPhoneNumber(data.phoneNumber);
         }
-        setReady(true);
       } catch (e) {
-        setReady(true);
+        console.error(e);
       }
     };
 
+    const auth = localStorage.getItem('auth');
+    if (!_.isNil(auth) && auth !== '') {
+      setAuthenticated(true);
+    }
     checkAuth();
   }, []);
 
@@ -193,10 +198,6 @@ const App = () => {
     setPhoneNumber('');
     localStorage.setItem('auth', '');
   };
-
-  if (!ready) {
-    return <div />;
-  }
 
   if (!isAuthenticated) {
     const loginProps = {
@@ -212,6 +213,7 @@ const App = () => {
     page,
     setPage,
   };
+
   return (
     <>
       <div className="nav">

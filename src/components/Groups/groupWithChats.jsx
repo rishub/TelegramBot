@@ -39,20 +39,24 @@ const GroupWithChats = ({
       <div className="chats">
         <h2>Select group</h2>
         <div className="chatsList">
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <input
-              placeholder="Group name"
-              value={groupName}
-              onChange={e => setGroupName(e.target.value)}
-              onKeyPress={e => {
-                if (e.key === 'Enter') addGroup();
-              }}
-            />
-            <button onClick={addGroup}>Add</button>
-          </div>
-          <p className="legal" style={{ color: 'red' }}>
-            {errorMessage}
-          </p>
+          {isEditable && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <input
+                  placeholder="Group name"
+                  value={groupName}
+                  onChange={e => setGroupName(e.target.value)}
+                  onKeyPress={e => {
+                    if (e.key === 'Enter') addGroup();
+                  }}
+                />
+                <button onClick={addGroup}>Add</button>
+              </div>
+              <p className="legal" style={{ color: 'red' }}>
+                {errorMessage}
+              </p>
+            </>
+          )}
           {groups.map(group => {
             const { name, phoneNumber } = group;
             const highlightStyle =

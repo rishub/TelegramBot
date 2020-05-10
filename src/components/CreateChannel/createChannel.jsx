@@ -38,6 +38,7 @@ const CreateChannel = ({ phoneNumber }) => {
     <div>
       {!submitted && (
         <>
+          <h2>Create a channel</h2>
           <input
             placeholder="Channel name"
             value={channelName}

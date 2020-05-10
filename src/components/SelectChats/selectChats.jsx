@@ -40,11 +40,33 @@ const SelectChats = ({
     );
   };
 
+  const handleSelectAll = e => {
+    const val = e.target.checked;
+
+    if (val) {
+      updateAllFiltered();
+    } else {
+      updateAllFiltered(true);
+    }
+  };
+
   return (
     <>
       <div className="chats">
         <h2>Available Chats</h2>
         <div className="chatsList">
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <input type="checkbox" onChange={handleSelectAll} />
+              <span style={{ marginLeft: '10px' }}>Select all</span>
+            </div>
+            <span
+              style={{ color: 'blue', cursor: 'pointer' }}
+              onClick={updateChats}
+            >
+              Refresh list
+            </span>
+          </div>
           <input
             placeholder="Filter..."
             value={filter}
@@ -71,11 +93,11 @@ const SelectChats = ({
               );
             })}
         </div>
-        <div className="selectAllButtons">
-          <button onClick={() => updateAllFiltered()}>Select all</button>
-          <button onClick={() => updateAllFiltered(true)}>Deselect all</button>
-        </div>
-        <button onClick={updateChats}>Refresh list</button>
+        {/*<div className="selectAllButtons">*/}
+        {/*  <button onClick={() => updateAllFiltered()}>Select all</button>*/}
+        {/*  <button onClick={() => updateAllFiltered(true)}>Deselect all</button>*/}
+        {/*</div>*/}
+        {/*<button onClick={updateChats}>Refresh list</button>*/}
       </div>
       <div className="chats">
         <h2>Selected Chats</h2>
