@@ -264,7 +264,7 @@ def remove_member():
 @app.route("/groups")
 def groups():
   phone_number = request.args.get('phoneNumber')
-  groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number)]
+  groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number).all()]
   return { "groups": groups }
 
 
