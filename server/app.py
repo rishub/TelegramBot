@@ -1,5 +1,5 @@
 import asyncio
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, jsonify
 import json
 import os
 import datetime
@@ -7,18 +7,23 @@ import sys
 import requests
 import time
 import traceback
-
+from urllib.parse import urlparse
+from dotenv import load_dotenv
 from telethon.sync import TelegramClient
 from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from sqlalchemy.orm.attributes import flag_modified
+
 
 app = Flask(__name__, static_folder='')
 
-BOT_API_KEY = "1197167345:AAFriOvxhWm7qyPG1h4gMAnN2aIDe_J3OmY"
-SEND_MESSAGE_API = f"https://api.telegram.org/bot{BOT_API_KEY}/sendMessage"
-GET_UPDATES_API = f"https://api.telegram.org/bot{BOT_API_KEY}/getUpdates"
-CHATS_FILENAME = "chats.json"
-TEAM_FILENAME = "team.json"
-GROUPS_FILENAME = "groups.json"
+load_dotenv()
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAWSDB_URL")
+db = SQLAlchemy(app)
+from server.models import Groups, Team
+migrate = Migrate(app, db)
+
 TELEGRAM_API_ID = "1207385"
 TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 
@@ -158,8 +163,7 @@ async def send_message_to_chats(phone_number, message, chats):
         id = chat['id']
         name = chat['name']
         try:
-          with open(get_file(TEAM_FILENAME)) as json_file:
-            team = json.load(json_file)
+          team = [item.as_dict() for item in Team.query.all()]
           team_ids = [member['id'] for member in team]
           entity = await client.get_input_entity(int(id))
           username = ""
@@ -206,10 +210,7 @@ if __name__ == '__main__':
 
 @app.route("/team")
 def team():
-  # Read current team from json file
-  with open(get_file(TEAM_FILENAME)) as json_file:
-      team = json.load(json_file)
-
+  team = [item.as_dict() for item in Team.query.all()]
   return { "team": team }
 
 
@@ -218,26 +219,12 @@ async def add_member_to_team(phone_number, username):
     client = await get_telegram_client(phone_number)
     error = False
 
-    # Read current team from json file
-    with open(get_file(TEAM_FILENAME)) as json_file:
-        team = json.load(json_file)
-
     try:
       entity = await client.get_entity(username)
-      user = {
-        "id": entity.id,
-        "username": entity.username,
-        "firstName": entity.first_name,
-        "lastName": entity.last_name
-      }
-
-      if user in team:
-        team[team.index(user)] = user
-      else:
-        team.append(user)
-
-      with open(get_file(TEAM_FILENAME),'w') as f:
-        json.dump(team, f, indent=4)
+      new_member = Team(id=entity.id, username=entity.username, first_name=entity.first_name or '', last_name=entity.last_name or '')
+      db.session.add(new_member)
+      db.session.commit()
+      team = [item.as_dict() for item in Team.query.all()]
     except:
       print(f"Failed to add member:")
       traceback.print_exc()
@@ -261,13 +248,10 @@ def remove_member():
   data = json.loads(request.data)
   phone_number = data['phoneNumber']
   username = data['username']
-  # Read current team from json file
-  with open(get_file(TEAM_FILENAME)) as json_file:
-      team = json.load(json_file)
-  item = next((x for x in team if x['username'] == username), None)
-  team.remove(item)
-  with open(get_file(TEAM_FILENAME),'w') as f:
-    json.dump(team, f, indent=4)
+  user = Team.query.filter_by(username=username).first()
+  db.session.delete(user)
+  db.session.commit()
+  team = [item.as_dict() for item in Team.query.all()]
   return { "team": team }
 
 
@@ -277,14 +261,8 @@ def remove_member():
 @app.route("/groups")
 def groups():
   phone_number = request.args.get('phoneNumber')
-
-  # Read current team from json file
-  with open(get_file(GROUPS_FILENAME)) as json_file:
-      groups = json.load(json_file)
-
-  my_groups = [group for group in groups if group['phoneNumber'] == phone_number]
-
-  return { "groups": my_groups }
+  groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number)]
+  return { "groups": groups }
 
 
 @app.route("/addGroup", methods=["POST"])
@@ -292,12 +270,10 @@ def add_group():
   data = json.loads(request.data)
   group_name = data['groupName']
   phone_number = data['phoneNumber']
-  # Read current team from json file
-  with open(get_file(GROUPS_FILENAME)) as json_file:
-      groups = json.load(json_file)
-  groups.append({ "name": group_name, "phoneNumber": phone_number, "chats": [] })
-  with open(get_file(GROUPS_FILENAME),'w') as f:
-        json.dump(groups, f, indent=4)
+  new_member = Groups(name=group_name, phone_number=phone_number, chats=[])
+  db.session.add(new_member)
+  db.session.commit()
+  groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number)]
   return { "groups": groups }
 
 @app.route("/removeGroup", methods=["POST"])
@@ -305,12 +281,10 @@ def remove_group():
   data = json.loads(request.data)
   group_name = data['groupName']
   phone_number = data['phoneNumber']
-  # Read current team from json file
-  with open(get_file(GROUPS_FILENAME)) as json_file:
-      groups = json.load(json_file)
-  groups = [group for group in groups if not (group['name'] == group_name and group["phoneNumber"] == phone_number)]
-  with open(get_file(GROUPS_FILENAME),'w') as f:
-        json.dump(groups, f, indent=4)
+  group = Groups.query.filter_by(name=group_name, phone_number=phone_number).first()
+  db.session.delete(group)
+  db.session.commit()
+  groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number)]
   return { "groups": groups }
 
 @app.route("/addChatsToGroup", methods=["POST"])
@@ -320,20 +294,15 @@ def add_chats_to_group():
   phone_number = data['phoneNumber']
   chats = data['chats']
 
-  with open(get_file(GROUPS_FILENAME)) as json_file:
-      groups = json.load(json_file)
+  group = Groups.query.filter_by(name=group_name, phone_number=phone_number).first()
 
-  item = next((x for x in groups if x['name'] == group_name and x['phoneNumber'] == phone_number), None)
-  if not item:
-    raise Exception("Invalid group")
+  group.chats.extend(chats)
+  group.chats = list({v['id']:v for v in group.chats}.values()) # remove duplicates
 
-  item["chats"].extend(chats)
-  # remove duplicates
-  item["chats"] = list({v['id']:v for v in item["chats"]}.values())
-  with open(get_file(GROUPS_FILENAME),'w') as f:
-      json.dump(groups, f, indent=4)
-
-  return { "group": item }
+  flag_modified(group, "chats")
+  db.session.merge(group)
+  db.session.commit()
+  return { "group": group.as_dict() }
 
 
 @app.route("/removeChatFromGroup", methods=["POST"])
@@ -343,20 +312,15 @@ def remove_chat_from_group():
   phone_number = data['phoneNumber']
   chat_id = data['chatId']
 
-  with open(get_file(GROUPS_FILENAME)) as json_file:
-      groups = json.load(json_file)
+  group = Groups.query.filter_by(name=group_name, phone_number=phone_number).first()
 
-  item = next((x for x in groups if x['name'] == group_name and x['phoneNumber'] == phone_number), None)
-  if not item:
-    raise Exception("Invalid group")
+  chat = next((x for x in group.chats if x['id'] == chat_id), None)
+  group.chats.remove(chat)
 
-  chat = next((x for x in item["chats"] if x['id'] == chat_id), None)
-  item["chats"].remove(chat)
-
-  with open(get_file(GROUPS_FILENAME),'w') as f:
-      json.dump(groups, f, indent=4)
-
-  return { "group": item }
+  flag_modified(group, "chats")
+  db.session.merge(group)
+  db.session.commit()
+  return { "group": group.as_dict() }
 
 
 # CREATE A CHANNEL FLOW
@@ -387,8 +351,7 @@ async def add_members(phone_number, channel_name):
   success = True
   try:
     client = await get_telegram_client(phone_number)
-    with open(get_file(TEAM_FILENAME)) as json_file:
-      team = json.load(json_file)
+    team = [item.as_dict() for item in Team.query.all()]
     usernames = [member['username'] for member in team]
     await client(InviteToChannelRequest(channel_name, usernames))
   except:
@@ -453,54 +416,3 @@ def add_members_to_channel():
 #   return response
 
 
-
-# BOT API Code below
-
-# @app.route('/chatData')
-# def chat_data():
-#     # Read current chats from json file
-#     with open(get_chats_json_path()) as json_file:
-#         chats = json.load(json_file)
-#     return chats
-#
-# @app.route('/sendMessage', methods=["POST"])
-# def send_message():
-#   data = json.loads(request.data)
-#   chat_ids = data['chatIds']
-#   message = data['message']
-#
-#   for chat_id in chat_ids:
-#     data = {
-#       "chat_id": chat_id,
-#       "text": message
-#     }
-#     r = requests.post(url = SEND_MESSAGE_API, data = data)
-#
-#   return { "success": True }
-#
-# @app.route('/updateChats', methods=['POST'])
-# def update_chats():
-#   response = requests.get(url = GET_UPDATES_API)
-#   result = response.json().get('result')
-#
-#   # Read current chats from json file
-#   with open(get_chats_json_path()) as json_file:
-#       chats = json.load(json_file)
-#
-#   for update in result:
-#   	if "channel_post" in update:
-#   		chat = update["channel_post"]["chat"]
-#   	if "message" in update:
-#   		chat = update["message"]["chat"]
-#   	chat_id = str(chat["id"])
-#   	if "title" not in chat:
-#   		# not a channel or a group
-#   		continue
-#   	chat_name = chat["title"]
-#   	chats[chat_id] = chat_name
-#
-#   # Write updated json to file
-#   with open(get_chats_json_path(),'w') as f:
-#       json.dump(chats, f, indent=4)
-#
-#   return { "success": True }

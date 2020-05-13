@@ -29,6 +29,7 @@ yarn-error.log*
 
 # python
 /venv/
+.env
 /server/__pycache__
 /sessions/*.session
 /sessions/*.session-journal

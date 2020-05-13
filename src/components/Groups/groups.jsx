@@ -14,8 +14,6 @@ const Groups = ({
   isEditable = true,
 }) => {
   const addSelectedChats = async () => {
-    console.log('test');
-    console.log(selectedGroup);
     const { selectedChats, chats, setChats } = selectChatsProps;
 
     const { data } = await axios.post('/addChatsToGroup', {

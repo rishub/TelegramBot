@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Switch, Route, Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import _ from 'lodash';
 
@@ -11,11 +13,9 @@ import Team from './components/Team/team';
 import Groups from './components/Groups/groups';
 import CreateChannel from './components/CreateChannel/createChannel';
 
-import { PAGES } from './constants';
-
 import './App.css';
 
-const Main = ({ phoneNumber, page, setPage }) => {
+const Main = ({ phoneNumber, history }) => {
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState('');
   const [loadingChats, setLoadingChats] = useState(false);
@@ -68,14 +68,13 @@ const Main = ({ phoneNumber, page, setPage }) => {
     message: `Are you sure you want to send "${message}" to ${selectedChats.length} chats?`,
     onCancel: () => setShowConfirmation(false),
     onConfirm: () => {
-      setPage(PAGES.SENDING);
+      history.push('/sending');
       setShowConfirmation(false);
     },
   };
 
   const sendingProps = {
     selectedChats,
-    setPage,
     phoneNumber,
     message,
   };
@@ -97,78 +96,75 @@ const Main = ({ phoneNumber, page, setPage }) => {
     phoneNumber,
   };
 
-  if (page === PAGES.SENDING) {
-    return <Sending {...sendingProps} />;
-  }
+  const ButtonManual = () => (
+    <button onClick={() => setManualOrGroup('manual')}>
+      Select chats manually
+    </button>
+  );
+  const ButtonGroup = () => (
+    <button onClick={() => setManualOrGroup('group')}>Select a group</button>
+  );
 
-  if (page === PAGES.HOME) {
-    const ButtonManual = () => (
-      <button onClick={() => setManualOrGroup('manual')}>
-        Select chats manually
-      </button>
-    );
-    const ButtonGroup = () => (
-      <button onClick={() => setManualOrGroup('group')}>Select a group</button>
-    );
-    return (
-      <>
-        {manualOrGroup && (
-          <div style={{ width: '200px' }}>
-            {manualOrGroup === 'manual' ? <ButtonGroup /> : <ButtonManual />}
-          </div>
-        )}
-        <div
-          className={`container ${showConfirmation ? 'blur' : ''}`}
-          style={{ justifyContent: 'space-between' }}
-        >
-          {manualOrGroup ? (
-            <>
-              {manualOrGroup === 'manual' ? (
-                <SelectChats {...selectChatsProps} />
-              ) : (
-                <Groups {...groupsProps} isEditable={false} />
-              )}
-            </>
-          ) : (
-            <div className="manualOrGroup">
-              <ButtonManual />
-              OR
-              <ButtonGroup />
+  return (
+    <Switch>
+      <Route exact path="/">
+        <>
+          {manualOrGroup && (
+            <div style={{ width: '200px' }}>
+              {manualOrGroup === 'manual' ? <ButtonGroup /> : <ButtonManual />}
             </div>
           )}
-          <div className="message">
-            <MessageBody {...messageBodyProps} />
+          <div
+            className={`container ${showConfirmation ? 'blur' : ''}`}
+            style={{ justifyContent: 'space-between' }}
+          >
+            {manualOrGroup ? (
+              <>
+                {manualOrGroup === 'manual' ? (
+                  <SelectChats {...selectChatsProps} />
+                ) : (
+                  <Groups {...groupsProps} isEditable={false} />
+                )}
+              </>
+            ) : (
+              <div className="manualOrGroup">
+                <ButtonManual />
+                OR
+                <ButtonGroup />
+              </div>
+            )}
+            <div className="message">
+              <MessageBody {...messageBodyProps} />
+            </div>
           </div>
+          {showConfirmation && (
+            <ConfirmationModal {...confirmationModalProps} />
+          )}
+        </>
+      </Route>
+      <Route path="/sending">
+        <Sending {...sendingProps} />
+      </Route>
+      <Route path="/team">
+        <Team {...teamProps} />
+      </Route>
+      <Route path="/groups">
+        <div className="container">
+          <Groups {...groupsProps} />
         </div>
-        {showConfirmation && <ConfirmationModal {...confirmationModalProps} />}
-      </>
-    );
-  }
-
-  if (page === PAGES.TEAM) {
-    return <Team {...teamProps} />;
-  }
-
-  if (page === PAGES.GROUPS) {
-    return (
-      <div className="container">
-        <Groups {...groupsProps} />
-      </div>
-    );
-  }
-
-  if (page === PAGES.CREATE_CHANNEL) {
-    return (
-      <div className="container">
-        <CreateChannel {...createChannelProps} />
-      </div>
-    );
-  }
+      </Route>
+      <Route path="/createChannel">
+        <div className="container">
+          <CreateChannel {...createChannelProps} />
+        </div>
+      </Route>
+    </Switch>
+  );
 };
 
 const App = () => {
+  const history = useHistory();
   const [isAuthenticated, setAuthenticated] = useState(false);
-  const [page, setPage] = useState(PAGES.HOME);
   const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
@@ -180,6 +176,8 @@ const App = () => {
         });
         if (data.loggedIn) {
           setPhoneNumber(data.phoneNumber);
+        } else {
+          setAuthenticated(false);
         }
       } catch (e) {
         console.error(e);
@@ -210,9 +208,10 @@ const App = () => {
 
   const mainProps = {
     phoneNumber,
-    page,
-    setPage,
+    history,
   };
+
+  const path = _.get(history, 'location.pathname', '/');
 
   return (
     <>
@@ -223,32 +222,27 @@ const App = () => {
             src="https://www.shareicon.net/data/128x128/2016/11/03/849462_messenger_512x512.png"
             alt="Telegram automation"
           />
-          <span
-            className={`navLink ${[page === PAGES.HOME ? 'active' : '']}`}
-            onClick={() => setPage(PAGES.HOME)}
-          >
+          <Link className={`navLink ${[path === '/' ? 'active' : '']}`} to="/">
             Home
-          </span>
-          <span
-            className={`navLink ${[page === PAGES.TEAM ? 'active' : '']}`}
-            onClick={() => setPage(PAGES.TEAM)}
+          </Link>
+          <Link
+            className={`navLink ${[path === '/team' ? 'active' : '']}`}
+            to="/team"
           >
             Manage team
-          </span>
-          <span
-            className={`navLink ${[page === PAGES.GROUPS ? 'active' : '']}`}
-            onClick={() => setPage(PAGES.GROUPS)}
+          </Link>
+          <Link
+            className={`navLink ${[path === '/groups' ? 'active' : '']}`}
+            to="/groups"
           >
             Manage groups
-          </span>
-          <span
-            className={`navLink ${[
-              page === PAGES.CREATE_CHANNEL ? 'active' : '',
-            ]}`}
-            onClick={() => setPage(PAGES.CREATE_CHANNEL)}
+          </Link>
+          <Link
+            className={`navLink ${[path === '/createChannel' ? 'active' : '']}`}
+            to="/createChannel"
           >
             Create a channel
-          </span>
+          </Link>
         </div>
         <div>
           {'(' +
@@ -262,9 +256,7 @@ const App = () => {
           </span>
         </div>
       </div>
-      <div className="main">
-        <Main {...mainProps} />
-      </div>
+      <Main {...mainProps} />
     </>
   );
 };

@@ -1,8 +1,7 @@
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import _ from 'lodash';
-
-import { PAGES } from '../../constants';
 
 import './sending.css';
 
@@ -69,9 +68,9 @@ const Sending = ({ selectedChats, setPage, message, phoneNumber }) => {
   return (
     <Fragment>
       {!loading && (
-        <button className="backArrow" onClick={() => setPage(PAGES.HOME)}>
+        <Link className="backArrow" to="/">
           Back to all chats
-        </button>
+        </Link>
       )}
       <div className="sendingList">
         <h3>Sending messages to the following chats...</h3>

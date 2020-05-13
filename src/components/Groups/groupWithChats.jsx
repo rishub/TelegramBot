@@ -34,6 +34,8 @@ const GroupWithChats = ({
     setErrorMessage(null);
   };
 
+  console.log(selectedGroup);
+
   return (
     <>
       <div className="chats">
@@ -58,7 +60,7 @@ const GroupWithChats = ({
             </>
           )}
           {groups.map(group => {
-            const { name, phoneNumber } = group;
+            const { name, phone_number: phoneNumber } = group;
             const highlightStyle =
               name === _.get(selectedGroup, 'name')
                 ? { background: 'yellow ' }

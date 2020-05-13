@@ -69,7 +69,11 @@ const Team = ({ phoneNumber }) => {
         {!loading && (
           <>
             {_.map(team, member => {
-              const { username, firstName, lastName } = member;
+              const {
+                username,
+                first_name: firstName,
+                last_name: lastName,
+              } = member;
 
               return (
                 <div className="chatRow staticRow" key={username}>

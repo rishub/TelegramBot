@@ -93,11 +93,6 @@ const SelectChats = ({
               );
             })}
         </div>
-        {/*<div className="selectAllButtons">*/}
-        {/*  <button onClick={() => updateAllFiltered()}>Select all</button>*/}
-        {/*  <button onClick={() => updateAllFiltered(true)}>Deselect all</button>*/}
-        {/*</div>*/}
-        {/*<button onClick={updateChats}>Refresh list</button>*/}
       </div>
       <div className="chats">
         <h2>Selected Chats</h2>
