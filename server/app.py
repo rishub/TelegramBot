@@ -3,6 +3,7 @@ from flask import Flask, request, send_from_directory, jsonify
 import json
 import os
 import datetime
+import json
 import sys
 import requests
 import time
@@ -14,6 +15,7 @@ from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannel
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.types import JSON
 
 
 app = Flask(__name__, static_folder='')
@@ -21,10 +23,25 @@ app = Flask(__name__, static_folder='')
 load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAWSDB_URL")
 db = SQLAlchemy(app)
-try:
-  from server.models import Groups, Team
-except:
-  from models import Groups, Team
+
+class Groups(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(120), unique=True, nullable=False)
+  phone_number = db.Column(db.String(12), nullable=False)
+  chats = db.Column(JSON, default=[])
+
+  def as_dict(self):
+       return {c.name: str(getattr(self, c.name)) if c.name != 'chats' else getattr(self, c.name) for c in self.__table__.columns}
+
+class Team(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  username = db.Column(db.String(120), unique=True, nullable=False)
+  first_name = db.Column(db.String(120), nullable=False)
+  last_name = db.Column(db.String(120), nullable=False)
+
+  def as_dict(self):
+     return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+
 migrate = Migrate(app, db)
 
 TELEGRAM_API_ID = "1207385"
