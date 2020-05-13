@@ -1,6 +1,9 @@
 from sqlalchemy.types import JSON
 import json
-from server.app import db
+try:
+  from server.app import db
+except:
+  from app import db
 
 class Groups(db.Model):
   id = db.Column(db.Integer, primary_key=True)

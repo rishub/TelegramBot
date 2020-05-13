@@ -21,7 +21,10 @@ app = Flask(__name__, static_folder='')
 load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAWSDB_URL")
 db = SQLAlchemy(app)
-from server.models import Groups, Team
+try:
+  from server.models import Groups, Team
+except:
+  from models import Groups, Team
 migrate = Migrate(app, db)
 
 TELEGRAM_API_ID = "1207385"
