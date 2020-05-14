@@ -16,7 +16,7 @@ const Groups = ({
   const addSelectedChats = async () => {
     const { selectedChats, chats, setChats } = selectChatsProps;
 
-    const { data } = await axios.post('/addChatsToGroup', {
+    const { data } = await axios.post('/api/addChatsToGroup', {
       phoneNumber,
       name: selectedGroup.name,
       chats: _.map(selectedChats, c => ({ id: c.id, name: c.name })),
@@ -34,7 +34,7 @@ const Groups = ({
   };
 
   const removeChatFromGroup = async chatId => {
-    const { data } = await axios.post('/removeChatFromGroup', {
+    const { data } = await axios.post('/api/removeChatFromGroup', {
       phoneNumber,
       name: selectedGroup.name,
       chatId,

@@ -30,7 +30,7 @@ const Main = ({ phoneNumber, history }) => {
 
   const updateChats = useCallback(async () => {
     setLoadingChats(true);
-    const { data } = await axios.get('/chatData', { params: { phoneNumber } });
+    const { data } = await axios.get('/api/chatData', { params: { phoneNumber } });
     const chatData = data.chatData;
     setChats(_.map(chatData, o => ({ ...o, isChecked: false, show: true })));
     setLoadingChats(false);
@@ -38,7 +38,7 @@ const Main = ({ phoneNumber, history }) => {
 
   useEffect(() => {
     const fetchGroups = async () => {
-      const { data } = await axios.get('/groups', { params: { phoneNumber } });
+      const { data } = await axios.get('/api/groups', { params: { phoneNumber } });
       setGroups(data.groups || []);
     };
 
@@ -171,7 +171,7 @@ const App = () => {
     const checkAuth = async () => {
       const auth = localStorage.getItem('auth');
       try {
-        const { data } = await axios.get('/checkAuth', {
+        const { data } = await axios.get('/api/checkAuth', {
           params: { auth },
         });
         if (data.loggedIn) {

@@ -11,7 +11,7 @@ const Team = ({ phoneNumber }) => {
   useEffect(() => {
     const fetchCurrentMembers = async () => {
       setLoading(true);
-      const { data } = await axios.get('/team');
+      const { data } = await axios.get('/api/team');
       setTeam(data.team || []);
       setLoading(false);
     };
@@ -21,7 +21,7 @@ const Team = ({ phoneNumber }) => {
 
   const addMember = async () => {
     setLoading(true);
-    const { data } = await axios.post('/addMember', {
+    const { data } = await axios.post('/api/addMember', {
       phoneNumber,
       username,
     });
@@ -37,7 +37,7 @@ const Team = ({ phoneNumber }) => {
 
   const removeMember = async username => {
     setLoading(true);
-    const { data } = await axios.post('/removeMember', {
+    const { data } = await axios.post('/api/removeMember', {
       phoneNumber,
       username,
     });

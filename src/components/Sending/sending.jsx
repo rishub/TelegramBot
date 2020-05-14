@@ -13,7 +13,7 @@ const Sending = ({ selectedChats, setPage, message, phoneNumber }) => {
 
   const sendMessageToChats = useCallback(
     async chats => {
-      const { data } = await axios.post('/sendMessage', {
+      const { data } = await axios.post('/api/sendMessage', {
         chats,
         message,
         phoneNumber,

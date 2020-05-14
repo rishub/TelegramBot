@@ -1,5 +1,5 @@
 import asyncio
-from flask import Flask, request, send_from_directory, jsonify
+from flask import Flask, Blueprint, request, send_from_directory, jsonify
 import json
 import os
 import datetime
@@ -19,6 +19,7 @@ from sqlalchemy.types import JSON
 
 
 app = Flask(__name__, static_folder='')
+bp = Blueprint('api', __name__)
 
 load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAWSDB_URL")
@@ -50,7 +51,7 @@ TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 def get_file(name):
   return os.path.join(app.static_folder, name)
 
-@app.route('/')
+@bp.route('/')
 def index():
     return send_from_directory(app.static_folder, 'build/index.html')
 
@@ -83,7 +84,7 @@ async def open_session(auth):
         continue
   return { "loggedIn": logged_in, "phoneNumber": phone_number }
 
-@app.route("/checkAuth")
+@bp.route("/checkAuth")
 def check_auth():
   auth = request.args.get('auth')
   response = loop.run_until_complete(open_session(auth))
@@ -108,7 +109,7 @@ async def send_code_request(phone_number):
   finally:
     await client.disconnect()
 
-@app.route("/sendCode", methods=["POST"])
+@bp.route("/sendCode", methods=["POST"])
 def send_code():
   data = json.loads(request.data)
   phone_number = data['phoneNumber']
@@ -126,7 +127,7 @@ async def submit_code_request(phone_number, code, hash):
     await client.disconnect()
 
 
-@app.route("/submitCode", methods=["POST"])
+@bp.route("/submitCode", methods=["POST"])
 def submit_code():
   data = json.loads(request.data)
   code = data['code']
@@ -163,7 +164,7 @@ async def get_chat_data(phone_number):
   finally:
     await client.disconnect()
 
-@app.route("/chatData")
+@bp.route("/chatData")
 def chat_data():
   phone_number = request.args.get('phoneNumber')
   response = loop.run_until_complete(get_chat_data(phone_number))
@@ -213,7 +214,7 @@ async def send_message_to_chats(phone_number, message, chats):
   finally:
     await client.disconnect()
 
-@app.route("/sendMessage", methods=["POST"])
+@bp.route("/sendMessage", methods=["POST"])
 def send_message():
   data = json.loads(request.data)
   phone_number = data['phoneNumber']
@@ -228,7 +229,7 @@ if __name__ == '__main__':
 
 # TEAM
 
-@app.route("/team")
+@bp.route("/team")
 def team():
   team = [item.as_dict() for item in Team.query.all()]
   return { "team": team }
@@ -254,7 +255,7 @@ async def add_member_to_team(phone_number, username):
   finally:
     await client.disconnect()
 
-@app.route("/addMember", methods=["POST"])
+@bp.route("/addMember", methods=["POST"])
 def add_member():
   data = json.loads(request.data)
   phone_number = data['phoneNumber']
@@ -263,7 +264,7 @@ def add_member():
   return response
 
 
-@app.route("/removeMember", methods=["POST"])
+@bp.route("/removeMember", methods=["POST"])
 def remove_member():
   data = json.loads(request.data)
   phone_number = data['phoneNumber']
@@ -278,14 +279,14 @@ def remove_member():
 # GROUPS
 
 
-@app.route("/groups")
+@bp.route("/groups")
 def groups():
   phone_number = request.args.get('phoneNumber')
   groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number).all()]
   return { "groups": groups }
 
 
-@app.route("/addGroup", methods=["POST"])
+@bp.route("/addGroup", methods=["POST"])
 def add_group():
   data = json.loads(request.data)
   group_name = data['groupName']
@@ -296,7 +297,7 @@ def add_group():
   groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number)]
   return { "groups": groups }
 
-@app.route("/removeGroup", methods=["POST"])
+@bp.route("/removeGroup", methods=["POST"])
 def remove_group():
   data = json.loads(request.data)
   group_name = data['groupName']
@@ -307,7 +308,7 @@ def remove_group():
   groups = [item.as_dict() for item in Groups.query.filter_by(phone_number=phone_number)]
   return { "groups": groups }
 
-@app.route("/addChatsToGroup", methods=["POST"])
+@bp.route("/addChatsToGroup", methods=["POST"])
 def add_chats_to_group():
   data = json.loads(request.data)
   group_name = data['name']
@@ -325,7 +326,7 @@ def add_chats_to_group():
   return { "group": group.as_dict() }
 
 
-@app.route("/removeChatFromGroup", methods=["POST"])
+@bp.route("/removeChatFromGroup", methods=["POST"])
 def remove_chat_from_group():
   data = json.loads(request.data)
   group_name = data['name']
@@ -358,7 +359,7 @@ async def create_channel_request(phone_number, channel_name):
     await client.disconnect()
   return { "success": success }
 
-@app.route("/createChannel", methods=["POST"])
+@bp.route("/createChannel", methods=["POST"])
 def create_channel():
   data = json.loads(request.data)
   channel_name = data['channelName']
@@ -382,13 +383,18 @@ async def add_members(phone_number, channel_name):
     await client.disconnect()
   return { "success": success }
 
-@app.route("/addMembersToChannel", methods=["POST"])
+@bp.route("/addMembersToChannel", methods=["POST"])
 def add_members_to_channel():
   data = json.loads(request.data)
   channel_name = data['channelName']
   phone_number = data['phoneNumber']
   response = loop.run_until_complete(add_members(phone_number, channel_name))
   return response
+
+
+app.register_blueprint(bp, url_prefix="/api")
+
+
 
 
 # async def get_num_chats(phone_number):
@@ -429,7 +435,7 @@ def add_members_to_channel():
 #   finally:
 #     await client.disconnect()
 #
-# @app.route("/numChats")
+# @bp.route("/numChats")
 # def num_chats():
 #   phone_number = request.args.get('phoneNumber')
 #   response = loop.run_until_complete(get_num_chats(phone_number))

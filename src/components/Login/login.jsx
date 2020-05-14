@@ -81,7 +81,7 @@ const LoginFlow = ({ phoneNumber, setPhoneNumber, setAuthenticated }) => {
   const [step, setStep] = useState(STEP_PHONE);
 
   const handlePhoneSubmit = async () => {
-    const { data } = await axios.post('/sendCode', { phoneNumber });
+    const { data } = await axios.post('/api/sendCode', { phoneNumber });
     if (data.loggedIn) {
       localStorage.setItem('auth', data.auth);
       setAuthenticated(true);
@@ -92,7 +92,7 @@ const LoginFlow = ({ phoneNumber, setPhoneNumber, setAuthenticated }) => {
   };
 
   const handleTwoFactorSubmit = async () => {
-    const { data } = await axios.post('/submitCode', {
+    const { data } = await axios.post('/api/submitCode', {
       code,
       hash: phoneHash,
       phoneNumber,

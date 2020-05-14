@@ -11,7 +11,7 @@ const CreateChannel = ({ phoneNumber }) => {
   const createChannel = async () => {
     setLoading(true);
     setSubmitted(true);
-    const { data } = await axios.post('/createChannel', {
+    const { data } = await axios.post('/api/createChannel', {
       channelName,
       phoneNumber,
     });
@@ -20,7 +20,7 @@ const CreateChannel = ({ phoneNumber }) => {
 
   const onAddTeam = async () => {
     setAdding(true);
-    const { data } = await axios.post('/addMembersToChannel', {
+    const { data } = await axios.post('/api/addMembersToChannel', {
       channelName,
       phoneNumber,
     });
