@@ -51,7 +51,7 @@ TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 def get_file(name):
   return os.path.join(app.static_folder, name)
 
-@bp.route('/')
+@app.route('/')
 def index():
     return send_from_directory(app.static_folder, 'build/index.html')
 
