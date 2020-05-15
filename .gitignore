@@ -10,8 +10,6 @@
 
 # production
 /build
-/server/build
-/server/static
 
 # misc
 .DS_Store
@@ -30,10 +28,11 @@ yarn-error.log*
 # python
 /venv/
 .env
-/server/__pycache__
+__pycache__
 /sessions/*.session
 /sessions/*.session-journal
-/server/*.csv
 
-# DB lol
-/server/groups.json
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

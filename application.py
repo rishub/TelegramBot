@@ -18,12 +18,12 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.types import JSON
 
 
-app = Flask(__name__, static_folder='')
+application = Flask(__name__, static_folder='build', static_url_path='')
 bp = Blueprint('api', __name__)
 
 load_dotenv()
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAWSDB_URL")
-db = SQLAlchemy(app)
+application.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAWSDB_URL")
+db = SQLAlchemy(application)
 
 class Groups(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -43,21 +43,19 @@ class Team(db.Model):
   def as_dict(self):
      return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
-migrate = Migrate(app, db)
+migrate = Migrate(application, db)
 
 TELEGRAM_API_ID = "1207385"
 TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 
-def get_file(name):
-  return os.path.join(app.static_folder, name)
-
-@app.route('/')
+@application.route('/')
 def index():
-    return send_from_directory(app.static_folder, 'build/index.html')
+    return send_from_directory(application.static_folder, 'index.html')
 
-loop = asyncio.get_event_loop()
 
 # COMMON HELPERS
+
+loop = asyncio.get_event_loop()
 
 async def get_telegram_client(phone_number):
   session_path = f"sessions/{phone_number}"
@@ -65,6 +63,8 @@ async def get_telegram_client(phone_number):
   await client.connect()
   return client
 
+def get_file(name):
+  return os.path.join(app.static_folder, name)
 
 # LOG IN FLOW
 
@@ -392,10 +392,10 @@ def add_members_to_channel():
   return response
 
 
-app.register_blueprint(bp, url_prefix="/api")
+application.register_blueprint(bp, url_prefix="/api")
 
-
-
+if __name__ == '__main__':
+    application.run()
 
 # async def get_num_chats(phone_number):
 #   try:
