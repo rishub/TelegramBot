@@ -51,8 +51,6 @@ TELEGRAM_API_HASH = 'b577054ff6343928f95d4f0c4e081fdd'
 @application.route('/', defaults={'path': ''})
 @application.route('/<path>')
 def index(path):
-    files = [f for f in os.listdir('.')]
-    return json.dumps(files)
     return send_from_directory(application.static_folder, 'index.html')
 
 
