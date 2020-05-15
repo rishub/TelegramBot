@@ -19,7 +19,10 @@ const GroupWithChats = ({
     if (_.map(groups, 'name').includes(groupName)) {
       setErrorMessage('Group name already exists!');
     }
-    const { data } = await axios.post('/api/addGroup', { groupName, phoneNumber });
+    const { data } = await axios.post('/api/addGroup', {
+      groupName,
+      phoneNumber,
+    });
     setGroups(data.groups);
     setErrorMessage(null);
   };
@@ -33,8 +36,6 @@ const GroupWithChats = ({
     setGroups(newGroups);
     setErrorMessage(null);
   };
-
-  console.log(selectedGroup);
 
   return (
     <>

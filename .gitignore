@@ -29,7 +29,6 @@ yarn-error.log*
 /venv/
 .env
 __pycache__
-/sessions/*.session
 /sessions/*.session-journal
 
 # Elastic Beanstalk Files
